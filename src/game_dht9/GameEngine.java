@@ -116,17 +116,18 @@ public class GameEngine extends Application {
         }
 		
     		// check if ball intersects brick
+    		int bricksHit = 0;
     		for (Brick myBrick : myBricks) {
 			 if (myBrick.getBoundsInParent().intersects(myBouncer.getView().getBoundsInParent())) {
-				 myBouncer.bounceOffBrick(myBrick);
-				 myBrick.destroyBrick();
-				 
-				 // enter nested loop for double brick collision
-				 for (Brick nextBrick : myBricks) {
-					 if (nextBrick.getBoundsInParent().intersects(myBouncer.getView().getBoundsInParent())) {
-		    			 nextBrick.destroyBrick();
-					 }
+				 // simulate 1 bounce even if ball hits two bricks in 1 frame
+				 bricksHit++;
+				 if (bricksHit == 1) {
+				 	myBouncer.bounceOffBrick(myBrick);
 				 }
+				 System.out.println(myBrick.brickType);
+				 myBrick.decrementType();
+				 myBrick.setFill(myBrick.brickType.getColor());
+				 
 			 }
     		}
     }
@@ -163,13 +164,14 @@ public class GameEngine extends Application {
 			for(int i = 0; i<rows; i++) {
 				for(int j = 0; j < cols; j++) {
 					board[i][j] = s.nextInt();
-					System.out.print(board[i][j] + " ");
+//					System.out.print(board[i][j] + " ");
 					
 					// set bricks in scene, distribute bricks across the screen
 					if (board[i][j] != 0) {
 						myBrick = new Brick (j, i, board[i][j]);
 						myBricks.add(myBrick);
-						myBrick.setFill(Color.BISQUE);
+						myBrick.setFill(myBrick.brickType.getColor());
+						
 						root.getChildren().add(myBrick);
 					}
 				}
