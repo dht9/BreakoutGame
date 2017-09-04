@@ -37,7 +37,7 @@ public class GameEngine extends Application {
 	public static final String TITLE = "JavaFX: Initial Game";
 	public static final String BALL_IMAGE = "ball.gif";
 	public static final String PADDLE_IMAGE = "paddle.gif";
-	public static final int WIDTH = 505;
+	public static final int WIDTH = 1000; //504 prev
 	public static final int HEIGHT = 700;
 	public static final Paint BACKGROUND = Color.BLACK;
 	public static final int FRAMES_PER_SECOND = 120;
@@ -48,6 +48,7 @@ public class GameEngine extends Application {
 	public double PADDLE_HEIGHT = 12;
 	public double PADDLE_WIDTH = 60;
 	public int mySceneNum = 1;
+	public Group root;
 
 	static Stage primaryStage;
 	public Timeline animation;
@@ -70,7 +71,7 @@ public class GameEngine extends Application {
 		// attach scene to the stage and display it
 
 		// create one top level collection to organize the things in the scene
-		Group root = new Group(addSceneText());
+		root = new Group(addSceneText());
 		Scene level1 = setupGame(root, WIDTH, HEIGHT, BACKGROUND, 1);
 
 //		Button button1 = new Button("Go to scene " + (mySceneNum+1));
@@ -98,7 +99,7 @@ public class GameEngine extends Application {
 			b.destroyBrick();
 		animation.stop();
 		animation.play();
-		Group root = new Group();
+		root = new Group();
 		primaryStage.setScene(setupGame(root, WIDTH, HEIGHT, BACKGROUND, sceneNum));
 		primaryStage.show();
 
@@ -210,8 +211,11 @@ public class GameEngine extends Application {
 			case 2:
 				s = new Scanner(new File("Level2.txt"));
 				break;
+			case 3:
+				s = new Scanner(new File("Level3.txt"));
+				break;
 			default:
-				s = new Scanner(new File("Level1.txt"));
+				s = new Scanner(new File("YOU_WIN.txt"));
 				break;
 			}
 			rows = s.nextInt();
@@ -273,8 +277,14 @@ public class GameEngine extends Application {
 		}
 		if (bricksLeft == 0) {
 			System.out.println("YOU WIN");
-			for(Brick b : myBricks) 
-				b.destroyBrick();
+			if (mySceneNum != 4) {
+				for(Brick b : myBricks) {	
+					b.destroyBrick();
+				}
+				mySceneNum++;
+				loadScene(root, WIDTH, HEIGHT, mySceneNum);
+				myBouncer.recenter(WIDTH, HEIGHT);
+			}
 			return;
 		}
 	}

@@ -17,12 +17,12 @@ public class Bouncer {
 	private Point2D myVelocity;
 	private int BALL_SIZE = 16; // 30 for symmetry
 	public double MAX_BOUNCE_ANGLE = 60;
-	public double BOUNCER_SPEED = 200;
+	public double BOUNCER_SPEED = 500;
 
 	/**
 	 * Create a bouncer from a given image.
 	 */
-	public Bouncer(Image image, int screenWidth, int screenHeight) {
+	public Bouncer(Image image, double screenWidth, double screenHeight) {
 		myView = new ImageView(image);
 		// make sure it stays a circle
 		myView.setFitWidth(BALL_SIZE);
@@ -32,6 +32,7 @@ public class Bouncer {
 		myView.setY(screenHeight / 2 - BALL_SIZE / 2);
 		// turn speed into velocity that can be updated on bounces
 		myVelocity = new Point2D(0, BOUNCER_SPEED);
+		System.out.println(myView.getX() + " , " + myView.getY());
 	}
 
 	/**
@@ -77,7 +78,7 @@ public class Bouncer {
 			// calculate distance between ball and paddle center
 			double distFromCenter = myView.getX() + myView.getFitWidth() / 2
 					- (myPaddle.myView.getX() + myPaddle.myView.getFitWidth() / 2);
-//			System.out.println(distFromCenter);
+			System.out.println(distFromCenter);
 			// normalize the distance [-1,1]
 			double normalizedDistFromCenter = distFromCenter / (myPaddle.myView.getFitWidth() / 2);
 			// calculate angle ball will bounce
@@ -125,6 +126,7 @@ public class Bouncer {
 		myView.setX(screenWidth / 2 - BALL_SIZE / 2);
 		myView.setY(screenHeight / 2 - BALL_SIZE / 2);
 		myVelocity = new Point2D(0,BOUNCER_SPEED);
+		System.out.println(myView.getX() + " , " + myView.getY());
 	}
 	/**
 	 * Returns internal view of bouncer to interact with other JavaFX methods.
