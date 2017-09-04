@@ -53,23 +53,31 @@ public class Bouncer {
 		if (myView.getX() < 0 || myView.getX() > screenWidth - myView.getBoundsInLocal().getWidth()) {
 			myVelocity = new Point2D(-myVelocity.getX(), myVelocity.getY());
 		}
-		// if (myView.getY() < 0 || myView.getY() > screenHeight -
-		// myView.getBoundsInLocal().getHeight()) {
-		if (myView.getY() < 0) {
-			myVelocity = new Point2D(myVelocity.getX(), -myVelocity.getY());
-		}
+//		if (myView.getY() < 0) {
+//			myVelocity = new Point2D(myVelocity.getX(), -myVelocity.getY());
+//		}
+	}
+	
+	/**
+	 * Check if ball is out-of-bounds
+	 */
+	public boolean outOfBounds(double screenHeight) {
+		if (myView.getY() > screenHeight || myView.getY() + myView.getFitHeight() < 0)
+			return true;
+		return false;	
 	}
 
 	/**
 	 * Bounce off the paddle.
 	 */
 	public void bounceOffPaddle(Paddle myPaddle) {
+		// check if ball hits top or bottom of paddle
 		if (myView.getY() + myView.getFitHeight() <= myPaddle.myView.getY() + myPaddle.myView.getFitHeight() / 2
 				|| myView.getY() >= myPaddle.myView.getY() + myPaddle.myView.getFitHeight() / 2) {
 			// calculate distance between ball and paddle center
 			double distFromCenter = myView.getX() + myView.getFitWidth() / 2
 					- (myPaddle.myView.getX() + myPaddle.myView.getFitWidth() / 2);
-			System.out.println(distFromCenter);
+//			System.out.println(distFromCenter);
 			// normalize the distance [-1,1]
 			double normalizedDistFromCenter = distFromCenter / (myPaddle.myView.getFitWidth() / 2);
 			// calculate angle ball will bounce
@@ -113,6 +121,11 @@ public class Bouncer {
 		// System.out.println("hit n/a");
 	}
 
+	public void recenter(double screenWidth, double screenHeight) {
+		myView.setX(screenWidth / 2 - BALL_SIZE / 2);
+		myView.setY(screenHeight / 2 - BALL_SIZE / 2);
+		myVelocity = new Point2D(0,BOUNCER_SPEED);
+	}
 	/**
 	 * Returns internal view of bouncer to interact with other JavaFX methods.
 	 */

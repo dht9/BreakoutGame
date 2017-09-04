@@ -13,19 +13,21 @@ public class Paddle {
 	public double PADDLE_WIDTH = 60;
 	public Point2D myVelocity;
 	private double PADDLE_SPEED = 300;
+	public int isExtended;
 
 	/**
 	 * Create a paddle from a given image.
 	 */
-	public Paddle(Image image, int screenWidth, int screenHeight) {
+	public Paddle(Image image, double screenWidth, double screenHeight) {
 		// set paddle attributes
 		myView = new ImageView(image);
 		myView.setFitWidth(PADDLE_WIDTH);
 		myView.setFitHeight(PADDLE_HEIGHT);
 		// set paddle starting position
 		myView.setX(screenWidth);
-		myView.setY(screenHeight);
+		myView.setY(screenHeight-50);
 		myVelocity = new Point2D(0, 0);
+		isExtended = 0;
 	}
 
 	/**
@@ -84,11 +86,49 @@ public class Paddle {
 			myVelocity = new Point2D(0, 0);
 		}
 	}
-
+	
+	/**
+	 * Next methods are paddle ABILITIES
+	 */
+	public void doubleExtend() {
+		myView.setFitWidth(2*PADDLE_WIDTH);
+		myView.setX(myView.getX()-PADDLE_WIDTH/2);
+		isExtended = 1;
+	}
+	public void doubleShrink() {
+		myView.setFitWidth(PADDLE_WIDTH);
+		myView.setX(myView.getX()+PADDLE_WIDTH/2);
+		isExtended = 0;
+	}
+	
+	public void wrapPaddle() {
+		
+	}
+	
+	
+	public void recenter(double screenWidth) {
+		myView.setX(screenWidth);
+		myVelocity = new Point2D(0, 0);
+	}
+	
+	
 	/**
 	 * Returns internal view of bouncer to interact with other JavaFX methods.
 	 */
 	public Node getView() {
 		return myView;
 	}
+	
+	
+	
+	
+//	public void checkExtensionPaddle1(KeyCode code) {
+//	// check if 'x' is enter for paddle extension toggle
+//	if (code == KeyCode.X) {
+//		if(isExtended == 0)
+//			doubleExtend();
+//		else
+//			doubleShrink();
+//	}
+//}
 }

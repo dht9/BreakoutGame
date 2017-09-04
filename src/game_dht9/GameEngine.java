@@ -7,6 +7,9 @@ import java.util.Scanner;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.LongProperty;
+import javafx.beans.property.SimpleLongProperty;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -14,8 +17,11 @@ import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
-import javafx.scene.shape.Rectangle;
-import javafx.scene.shape.Shape;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
+//import javafx.scene.shape.Rectangle;
+//import javafx.scene.shape.Shape;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -32,7 +38,7 @@ public class GameEngine extends Application {
 	public static final String BALL_IMAGE = "ball.gif";
 	public static final String PADDLE_IMAGE = "paddle.gif";
 	public static final int WIDTH = 505;
-	public static final int HEIGHT = 600;
+	public static final int HEIGHT = 700;
 	public static final Paint BACKGROUND = Color.BLACK;
 	public static final int FRAMES_PER_SECOND = 120;
 	public static final int MILLISECOND_DELAY = 1000 / FRAMES_PER_SECOND;
@@ -41,17 +47,19 @@ public class GameEngine extends Application {
 	public static final double GROWTH_RATE = 1.1;
 	public double PADDLE_HEIGHT = 12;
 	public double PADDLE_WIDTH = 60;
-	
+	public int mySceneNum = 1;
+
 	static Stage primaryStage;
 	public Timeline animation;
 
 	private Scene myScene;
 	private Bouncer myBouncer;
+	private Player player;
+	private LongProperty player1Lives = new SimpleLongProperty(0);
 	private Paddle myPaddle1;
 	private Paddle myPaddle2;
 	private Brick myBrick;
 	private List<Brick> myBricks = new ArrayList<>();
-	private Group root;
 
 	/**
 	 * Initialize what will be displayed and how it will be updated.
@@ -62,22 +70,15 @@ public class GameEngine extends Application {
 		// attach scene to the stage and display it
 
 		// create one top level collection to organize the things in the scene
-		Group root = new Group();
-		Scene level1 = setupGame(root, WIDTH, HEIGHT, BACKGROUND);
-		
-//		Group root2 = new Group();
-//		Scene level2 = setupGame(root2, WIDTH,HEIGHT, BACKGROUND);
-//		BrickLevel level1 = new BrickLevel();
-//		Scene scene1 = scene1.init(WIDTH, HEIGHT, BACKGROUND);
-//		BrickLevel level2 = new BrickLevel();
-//		Scene scene2 = scene2.init(WIDTH, HEIGHT, BACKGROUND);
-		
-		Button button1= new Button("Go to scene 2");
-		root.getChildren().add(button1);
-//		
-		button1.setOnAction(e -> changeScene(primaryStage, 0));
-		
-		
+		Group root = new Group(addSceneText());
+		Scene level1 = setupGame(root, WIDTH, HEIGHT, BACKGROUND, 1);
+
+//		Button button1 = new Button("Go to scene " + (mySceneNum+1));
+//		root.getChildren().add(button1);
+//		button1.setOnAction(e -> changeScene(primaryStage, mySceneNum+1));
+//		root.getChildren().add(Lives);
+//		Lives.textProperty().bind(Bindings.createStringBinding(() -> ("GG! " + player1Lives), player1Lives));
+
 		primaryStage.setScene(level1);
 		primaryStage.setTitle(TITLE);
 		primaryStage.show();
@@ -91,42 +92,41 @@ public class GameEngine extends Application {
 
 		System.out.println("scene set up");
 	}
-	
-	public void changeScene(Stage primaryStage, int sceneNum) {
-		Group root = new Group();
-//		Scene level = setupGame(roota, WIDTH, HEIGHT, BACKGROUND);
-//		animation.play();
-		
-		primaryStage.setScene(setupGame(root, WIDTH, HEIGHT, BACKGROUND));
-		primaryStage.show();
-		Button button1= new Button("Go to scene 2");
-		root.getChildren().add(button1);
 
-		button1.setOnAction(e -> changeScene(primaryStage, 0));
+	public void changeScene(Stage primaryStage, int sceneNum) {
+		for(Brick b : myBricks) 
+			b.destroyBrick();
+		animation.stop();
+		animation.play();
+		Group root = new Group();
+		primaryStage.setScene(setupGame(root, WIDTH, HEIGHT, BACKGROUND, sceneNum));
+		primaryStage.show();
+
+		Button button1 = new Button("Go to scene " + (mySceneNum+1));
+		root.getChildren().add(button1);
+		button1.setOnAction(e -> changeScene(primaryStage, mySceneNum));
+		System.out.println("Scene: " + sceneNum);
 		
-		// attach "game loop" to timeline to play it
-//		KeyFrame frame1 = new KeyFrame(Duration.millis(MILLISECOND_DELAY), e -> step(SECOND_DELAY));
-//		animation = new Timeline();
-//		animation.setCycleCount(Timeline.INDEFINITE);
-//		animation.getKeyFrames().add(frame1);
-//		animation.play();
-		
+		mySceneNum++;
+
 	}
 
 	// Create the game's "scene": what shapes will be in the game and their starting
 	// properties
-	private Scene setupGame(Group root, int width, int height, Paint background) {
+	private Scene setupGame(Group root, int width, int height, Paint background, int sceneNum) {
 
 		// make some shapes and set their properties
 
-		loadLevel1(root, width, height);
+		loadScene(root, width, height, sceneNum);
+		
+		player = new Player();
 
 		Image ballImage = new Image(getClass().getClassLoader().getResourceAsStream(BALL_IMAGE));
 		myBouncer = new Bouncer(ballImage, width, height);
 
 		Image paddleImage = new Image(getClass().getClassLoader().getResourceAsStream(PADDLE_IMAGE));
-		myPaddle1 = new Paddle(paddleImage, (int) (width / 2 - PADDLE_WIDTH / 2), (int) (height - PADDLE_HEIGHT));
-		myPaddle2 = new Paddle(paddleImage, (int) (width / 2 - PADDLE_WIDTH / 2), (int) 0);
+		myPaddle1 = new Paddle(paddleImage, width / 2 - PADDLE_WIDTH / 2, height - PADDLE_HEIGHT);
+		myPaddle2 = new Paddle(paddleImage, width / 2 - PADDLE_WIDTH / 2, 100);
 
 		root.getChildren().add(myBouncer.getView());
 		root.getChildren().add(myPaddle1.getView());
@@ -134,11 +134,11 @@ public class GameEngine extends Application {
 
 		// create a place to see the shapes
 		myScene = new Scene(root, width, height, background);
-		
+
 		myScene.setOnKeyPressed(e -> handleKeyInput(e.getCode()));
 
 		myScene.setOnKeyReleased(e -> handleKeyRelease(e.getCode()));
-		
+
 		return myScene;
 	}
 
@@ -146,6 +146,9 @@ public class GameEngine extends Application {
 		// update attributes
 		myBouncer.move(elapsedTime);
 		myBouncer.bounce(myScene.getWidth(), myScene.getHeight());
+
+		checkOutOfBounds();
+		
 		myPaddle1.move(elapsedTime);
 		myPaddle2.move(elapsedTime);
 
@@ -158,38 +161,7 @@ public class GameEngine extends Application {
 		}
 
 		// check if ball intersects brick
-		int bricksHit = 0;
-		int bricksLeft = 0;
-		for (Brick myBrick : myBricks) {
-			if (myBrick.getBoundsInParent().intersects(myBouncer.getView().getBoundsInParent())) {
-				// simulate 1 bounce even if ball hits two bricks in 1 frame
-				bricksHit++;
-				if (bricksHit == 1) {
-					myBouncer.bounceOffBrick(myBrick);
-				}
-
-//				System.out.println(myBrick.brickType);
-				myBrick.decrementType();
-				myBrick.setFill(myBrick.brickType.getColor());
-			}
-			// count non-permanent bricks left
-			if (!myBrick.brickType.toString().equals("INFINITE")
-					&& !(myBrick.brickType.toString().equals("DESTROYED"))) {
-				bricksLeft++;
-			}
-		}
-//		System.out.println("bricks left: " + bricksLeft);
-		
-		if (bricksLeft == 0) {
-			System.out.println("YOU WIN");
-//			Button button1= new Button("Go to scene 2");
-//			root.getChildren().add(button1);
-//			changeScene(0);
-//			animation.stop();
-//			animation.play();
-//			changeScene(primaryStage, 0);
-			return;
-		}
+		checkBallBrickCollision();
 	}
 
 	/**
@@ -207,15 +179,41 @@ public class GameEngine extends Application {
 		myPaddle1.stopPaddle1(code);
 		myPaddle2.stopPaddle2(code);
 	}
+	
+	/**
+	 *  Add text
+	 */
+	private TextFlow addSceneText() {
+		TextFlow textFlow = new TextFlow();
+		textFlow.setLayoutX(10);
+		textFlow.setLayoutY(5);
+		Text p1Lives = new Text("Team Lives: ");
+//		text1.textProperty().bind(Bindings.createIntegerBinding(() -> (player1.lives), player1));
+		p1Lives.setFont(Font.font("Calibri",20));
+		p1Lives.setFill(Color.WHITE);
+		textFlow.getChildren().addAll(p1Lives);
+		return textFlow;
+	}
 
 	/**
 	 * Load Level 1 Brick Layout
 	 */
-	private void loadLevel1(Group root, int screenWidth, int screenHeight) {
+	private void loadScene(Group root, int screenWidth, int screenHeight, int sceneNum) {
 		Scanner s;
 		int rows, cols;
 		try {
-			s = new Scanner(new File("Level1.txt"));
+			switch (sceneNum) {
+			case 0:
+			case 1:
+				s = new Scanner(new File("Level1.txt"));
+				break;
+			case 2:
+				s = new Scanner(new File("Level2.txt"));
+				break;
+			default:
+				s = new Scanner(new File("Level1.txt"));
+				break;
+			}
 			rows = s.nextInt();
 			cols = s.nextInt();
 			int board[][] = new int[rows][cols];
@@ -238,6 +236,46 @@ public class GameEngine extends Application {
 
 		} catch (FileNotFoundException e) {
 			System.out.print("Error in text file.");
+		}
+	}
+	
+	public void checkOutOfBounds() {
+		if (myBouncer.outOfBounds(HEIGHT)) {
+			player.decrementLives();
+			System.out.println("TEAM LIVES LEFT: " + player.lives);
+			myBouncer.recenter(WIDTH, HEIGHT);
+			myPaddle1.recenter(WIDTH / 2 - PADDLE_WIDTH / 2);
+			myPaddle2.recenter(WIDTH / 2 - PADDLE_WIDTH / 2);
+		}
+	}
+	
+	/**
+	 * Update attributes when ball hits brick
+	 */
+	public void checkBallBrickCollision() {
+		int bricksHit = 0;
+		int bricksLeft = 0;
+		for (Brick myBrick : myBricks) {
+			if (myBrick.getBoundsInParent().intersects(myBouncer.getView().getBoundsInParent())) {
+				// simulate 1 bounce even if ball hits two bricks in 1 frame
+				bricksHit++;
+				if (bricksHit == 1) {
+					myBouncer.bounceOffBrick(myBrick);
+				}
+				myBrick.decrementType();
+				myBrick.setFill(myBrick.brickType.getColor());
+			}
+			// count non-permanent bricks left
+			if (!myBrick.brickType.toString().equals("INFINITE")
+					&& !(myBrick.brickType.toString().equals("DESTROYED"))) {
+				bricksLeft++;
+			}
+		}
+		if (bricksLeft == 0) {
+			System.out.println("YOU WIN");
+			for(Brick b : myBricks) 
+				b.destroyBrick();
+			return;
 		}
 	}
 

@@ -42,7 +42,7 @@ public class Brick extends Rectangle {
 		// set brick health
 		this.setBrickType(brickNum);
 //		System.out.println(this.brickType.toString());
-		// System.out.print(this.brickType.getHealth() + " ");
+//		 System.out.print(this.brickType.getHealth() + " ");
 		// this.brickType = brickType;
 	}
 
@@ -80,7 +80,7 @@ public class Brick extends Rectangle {
 		case 1:
 		default:
 			brickType = Type.DESTROYED;
-			// System.out.println("BRICK DESTROYED");
+//			 System.out.println("BRICK DESTROYED");
 			this.destroyBrick();
 			break;
 		}
@@ -91,7 +91,8 @@ public class Brick extends Rectangle {
 		this.setY(-1);
 		this.setWidth(0);
 		this.setHeight(0);
-		System.out.println("BRICK DESTROYED");
+		brickType = Type.DESTROYED;
+//		System.out.println("BRICK DESTROYED");
 	}
 
 }
