@@ -1,10 +1,12 @@
 package game_dht9;
 
+import game_dht9.Brick.Type;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
+import javafx.scene.paint.Color;
 
 public class Paddle {
 
@@ -14,7 +16,14 @@ public class Paddle {
 	public Point2D myVelocity;
 	private double PADDLE_SPEED = 400;
 	public int isExtended;
-
+	
+	Type currType;
+	Type prevType;
+	
+	enum Type {
+		EXTENDED, MAGNETIC, EDGEWRAPPED, PLAIN;
+	}
+	
 	/**
 	 * Create a paddle from a given image.
 	 */
@@ -28,6 +37,28 @@ public class Paddle {
 		myView.setY(screenHeight - 75);
 		myVelocity = new Point2D(0, 0);
 		isExtended = 0;
+		currType = Type.PLAIN;
+	}
+	
+	public void chooseAbility(int num) {
+		switch(num) {
+		case 0:
+			this.prevType = currType;
+			this.currType = Type.EXTENDED;
+			break;
+		case 1:
+			this.prevType = currType;
+			this.currType = Type.MAGNETIC;
+			break;
+		case 2:
+			this.prevType = currType;
+			this.currType = Type.EDGEWRAPPED;
+			break;
+		default:
+			this.prevType = Type.PLAIN;
+			this.currType = Type.PLAIN;
+			break;
+		}
 	}
 
 	/**
@@ -36,10 +67,10 @@ public class Paddle {
 	public void startPaddle1(KeyCode code) {
 		if (code == KeyCode.RIGHT) {
 			myVelocity = new Point2D(PADDLE_SPEED, 0);
-			System.out.println(code);
+//			System.out.println(code);
 		} else if (code == KeyCode.LEFT) {
 			myVelocity = new Point2D(-PADDLE_SPEED, 0);
-			System.out.println(code);
+//			System.out.println(code);
 		}
 	}
 
@@ -49,10 +80,10 @@ public class Paddle {
 	public void startPaddle2(KeyCode code) {
 		if (code == KeyCode.D) {
 			myVelocity = new Point2D(PADDLE_SPEED, 0);
-			System.out.println(code);
+//			System.out.println(code);
 		} else if (code == KeyCode.A) {
 			myVelocity = new Point2D(-PADDLE_SPEED, 0);
-			System.out.println(code);
+//			System.out.println(code);
 		}
 	}
 
@@ -90,10 +121,24 @@ public class Paddle {
 	/**
 	 * Next methods are paddle ABILITIES
 	 */
+	public void enablePaddleAbility() {
+		if (this.currType == Type.EXTENDED) {
+			this.doubleExtend();
+		}
+		else if (this.prevType == Type.EXTENDED && this.isExtended == 1) {
+			// shrink paddle if extended for next level
+			this.doubleShrink();
+		}
+	}
 	public void doubleExtend() {
-		myView.setFitWidth(2*PADDLE_WIDTH);
-		myView.setX(myView.getX()-PADDLE_WIDTH/2);
-		isExtended = 1;
+		if (isExtended == 1) {
+			doubleShrink();
+		}
+		else {
+			myView.setFitWidth(PADDLE_WIDTH*2);
+			myView.setX(myView.getX()-PADDLE_WIDTH/2);
+			isExtended = 1;
+		}
 	}
 	public void doubleShrink() {
 		myView.setFitWidth(PADDLE_WIDTH);
@@ -113,7 +158,7 @@ public class Paddle {
 	}
 	
 	public double getWidth() {
-		return PADDLE_WIDTH;
+		return this.myView.getFitWidth();
 		
 	}
 	

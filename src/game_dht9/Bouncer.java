@@ -19,6 +19,7 @@ public class Bouncer {
 	private double BALL_SIZE = 20; // 16 for symmetry
 	public double MAX_BOUNCE_ANGLE = 60;
 	public double BOUNCER_SPEED = 350;
+	private boolean restarted;
 
 	/**
 	 * Create a bouncer from a given image.
@@ -35,6 +36,7 @@ public class Bouncer {
 		// turn speed into velocity that can be updated on bounces
 		myVelocity = new Point2D(0, 0);
 //		System.out.println(myView.getX() + " , " + myView.getY());
+		restarted = true;
 	}
 	
 	public double getVelocityX() {
@@ -72,39 +74,52 @@ public class Bouncer {
 	 * Check if ball is out-of-bounds
 	 */
 	public boolean outOfBounds(double screenWidth, double screenHeight) {
-		if (myView.getY() > screenHeight || myView.getY() + myView.getFitHeight() < 0)
+		if (myView.getY() > screenHeight || myView.getY() + myView.getFitHeight() < 0) {
+			restarted = true;
 			return true;
-		if (myView.getX() > screenWidth || myView.getX() + myView.getFitWidth() < 0)
+		}
+		if (myView.getX() > screenWidth || myView.getX() + myView.getFitWidth() < 0) {
+			restarted = true;
 			return true;
+		}
 		return false;	
 	}
 
 	/**
 	 * Bounce off the paddle.
 	 */
-	public void bounceOffPaddle(Paddle myPaddle) {
+	public void bounceOffPaddle(Paddle myPaddle, double screenHeight) {
 		// check if ball hits top or bottom of paddle
 		if (myView.getY() + myView.getFitHeight() <= myPaddle.myView.getY() + myPaddle.myView.getFitHeight() / 2
 				|| myView.getY() >= myPaddle.myView.getY() + myPaddle.myView.getFitHeight() / 2) {
 			// calculate distance between ball and paddle center
 			double distFromCenter = myView.getX() + myView.getFitWidth() / 2
 					- (myPaddle.myView.getX() + myPaddle.myView.getFitWidth() / 2);
+			if(distFromCenter == 0 && isInBottomHalf(screenHeight)) {
+				myVelocity = new Point2D(0, -BOUNCER_SPEED);
+				return;
+			}
+			else if(distFromCenter == 0 && !isInBottomHalf(screenHeight)) {
+				myVelocity = new Point2D(0, BOUNCER_SPEED);
+				return;
+			}
 			System.out.println(distFromCenter);
 			// normalize the distance [-1,1]
 			double normalizedDistFromCenter = distFromCenter / (myPaddle.myView.getFitWidth() / 2);
 			// calculate angle ball will bounce
 			double bounceAngle = normalizedDistFromCenter * MAX_BOUNCE_ANGLE;
 			double ballVx = BOUNCER_SPEED * Math.sin(Math.toRadians(bounceAngle));
-			myVelocity = new Point2D(ballVx, -myVelocity.getY());
+			double ballVy = BOUNCER_SPEED * Math.cos(Math.toRadians(bounceAngle));
+			myVelocity = new Point2D(ballVx, ballVy*(-getSign(myVelocity.getY())));
 		}
 		// check if ball hits left side of paddle
-		else if (myView.getX() + myView.getFitWidth() / 2 <= myPaddle.myView.getX()) {
+		else if (myView.getX() + myView.getFitWidth() * 3 / 4 <= myPaddle.myView.getX()) {
 			myVelocity = new Point2D((-BOUNCER_SPEED + myPaddle.myVelocity.getX()) * Math.sin(45),
 					BOUNCER_SPEED * Math.cos(45));
 			System.out.println((-BOUNCER_SPEED + myPaddle.myVelocity.getX()) * Math.sin(45));
 		}
 		// check if ball hits right side of paddle
-		else if (myView.getX() + myView.getFitWidth() / 2 >= myPaddle.myView.getX() + myPaddle.myView.getFitWidth()) {
+		else if (myView.getX() + myView.getFitWidth() / 4 >= myPaddle.myView.getX() + myPaddle.myView.getFitWidth()) {
 			myVelocity = new Point2D((BOUNCER_SPEED + myPaddle.myVelocity.getX()) * Math.sin(45),
 					BOUNCER_SPEED * Math.cos(45));
 		}
@@ -144,10 +159,55 @@ public class Bouncer {
 		myVelocity = new Point2D(0,0);
 //		System.out.println(myView.getX() + " , " + myView.getY());
 	}
-	public void releaseBall(KeyCode code) {
-		// if SPACEBAR entered, release ball
-		myVelocity = new Point2D(0, -BOUNCER_SPEED);
+	public void releaseBall(Paddle myPaddle, double screenHeight) {
+		// if SPACEBAR entered, release ball at certain angle
+		double distFromCenter = myView.getX() + myView.getFitWidth() / 2
+				- (myPaddle.myView.getX() + myPaddle.myView.getFitWidth() / 2);
+		if (distFromCenter == 0) {
+			if(isInBottomHalf(screenHeight))
+				myVelocity = new Point2D(0,-BOUNCER_SPEED);
+			else
+				myVelocity = new Point2D(0,BOUNCER_SPEED);
+		}
+		else {
+			double normalizedDistFromCenter = distFromCenter / (myPaddle.myView.getFitWidth() / 2);
+			// calculate angle ball will bounce
+			double bounceAngle = normalizedDistFromCenter * MAX_BOUNCE_ANGLE;
+			double ballVx = BOUNCER_SPEED * Math.sin(Math.toRadians(bounceAngle));
+			double ballVy = BOUNCER_SPEED * Math.cos(Math.toRadians(bounceAngle));
+			
+			if(isInBottomHalf(screenHeight))
+				myVelocity = new Point2D(ballVx, -ballVy);
+			else
+				myVelocity = new Point2D(ballVx, ballVy);
+		
+		}
 		System.out.println("release");
+		restarted = false;
+	}
+	
+	/**
+	 * Miscellaneous methods
+	 */
+	public int getSign(double num) {
+		if (num > 0)
+			return 1;
+		else if (num == 0)
+			return 0;
+		else
+			return -1;
+	}
+	
+	public boolean hasRestarted() {
+		return restarted;
+	}
+	public void restartBall() {
+		restarted = true;
+	}
+	public boolean isInBottomHalf(double screenHeight) { 
+		if(myView.getY() > screenHeight/2)
+			return true;
+		return false;
 	}
 
 	/**
