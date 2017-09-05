@@ -10,9 +10,9 @@ public class Paddle {
 
 	ImageView myView;
 	public double PADDLE_HEIGHT = 12;
-	public double PADDLE_WIDTH = 60;
+	public double PADDLE_WIDTH = 120;
 	public Point2D myVelocity;
-	private double PADDLE_SPEED = 300;
+	private double PADDLE_SPEED = 400;
 	public int isExtended;
 
 	/**
@@ -24,8 +24,8 @@ public class Paddle {
 		myView.setFitWidth(PADDLE_WIDTH);
 		myView.setFitHeight(PADDLE_HEIGHT);
 		// set paddle starting position
-		myView.setX(screenWidth);
-		myView.setY(screenHeight-50);
+		myView.setX(screenWidth - PADDLE_WIDTH/2);
+		myView.setY(screenHeight - 75);
 		myVelocity = new Point2D(0, 0);
 		isExtended = 0;
 	}
@@ -100,15 +100,21 @@ public class Paddle {
 		myView.setX(myView.getX()+PADDLE_WIDTH/2);
 		isExtended = 0;
 	}
+
 	
 	public void wrapPaddle() {
 		
 	}
 	
 	
-	public void recenter(double screenWidth) {
-		myView.setX(screenWidth);
+	public void recenter(double x) {
+		myView.setX(x);
 		myVelocity = new Point2D(0, 0);
+	}
+	
+	public double getWidth() {
+		return PADDLE_WIDTH;
+		
 	}
 	
 	

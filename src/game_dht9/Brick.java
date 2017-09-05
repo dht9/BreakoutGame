@@ -10,7 +10,7 @@ public class Brick extends Rectangle {
 	Type brickType;
 
 	enum Type {
-		INFINITE(8, Color.GRAY), HIGH(3, Color.web("#FF007F")), MEDIUM(2, Color.web("#FF66B2")), LOW(1,
+		BARRIER(10, Color.WHITE), INFINITE(8, Color.GRAY), HIGH(3, Color.web("#FF007F")), MEDIUM(2, Color.web("#FF66B2")), LOW(1,
 				Color.web("#FFCCE5")), DESTROYED(0, Color.WHITE);
 		private int health;
 		private Color color;
@@ -30,7 +30,7 @@ public class Brick extends Rectangle {
 		
 	}
 
-	public Brick(int x, int y, int brickNum) {
+	public Brick(double x, double y, int brickNum) {
 		// set brick location
 		this.setX(x * BRICK_WIDTH + 5);
 		this.setY(y * BRICK_HEIGHT);
@@ -48,6 +48,9 @@ public class Brick extends Rectangle {
 
 	public void setBrickType(int brickNum) {
 		switch (brickNum) {
+		case 10:
+			this.brickType = Type.BARRIER;
+			break;
 		case 8:
 			this.brickType = Type.INFINITE;
 			break;
@@ -69,6 +72,8 @@ public class Brick extends Rectangle {
 
 	public void decrementType() {
 		switch (this.brickType.health) {
+		case 10:
+			break;
 		case 8:
 			break;
 		case 3:

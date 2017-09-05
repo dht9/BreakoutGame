@@ -5,6 +5,7 @@ import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
 
 /**
  * Bouncer used in Breakout
@@ -13,11 +14,11 @@ import javafx.scene.image.ImageView;
  */
 public class Bouncer {
 
-	private ImageView myView;
+	public ImageView myView;
 	private Point2D myVelocity;
-	private int BALL_SIZE = 16; // 30 for symmetry
+	private double BALL_SIZE = 20; // 16 for symmetry
 	public double MAX_BOUNCE_ANGLE = 60;
-	public double BOUNCER_SPEED = 500;
+	public double BOUNCER_SPEED = 350;
 
 	/**
 	 * Create a bouncer from a given image.
@@ -28,11 +29,19 @@ public class Bouncer {
 		myView.setFitWidth(BALL_SIZE);
 		myView.setFitHeight(BALL_SIZE);
 		// make sure it stays within the bounds
-		myView.setX(screenWidth / 2 - BALL_SIZE / 2);
-		myView.setY(screenHeight / 2 - BALL_SIZE / 2);
+		myView.setX(0);
+		myView.setY(0);
+//		recenter()
 		// turn speed into velocity that can be updated on bounces
-		myVelocity = new Point2D(0, BOUNCER_SPEED);
-		System.out.println(myView.getX() + " , " + myView.getY());
+		myVelocity = new Point2D(0, 0);
+//		System.out.println(myView.getX() + " , " + myView.getY());
+	}
+	
+	public double getVelocityX() {
+		return myVelocity.getX();
+	}
+	public double getVelocityY() {
+		return myVelocity.getY();
 	}
 
 	/**
@@ -62,8 +71,10 @@ public class Bouncer {
 	/**
 	 * Check if ball is out-of-bounds
 	 */
-	public boolean outOfBounds(double screenHeight) {
+	public boolean outOfBounds(double screenWidth, double screenHeight) {
 		if (myView.getY() > screenHeight || myView.getY() + myView.getFitHeight() < 0)
+			return true;
+		if (myView.getX() > screenWidth || myView.getX() + myView.getFitWidth() < 0)
 			return true;
 		return false;	
 	}
@@ -104,30 +115,41 @@ public class Bouncer {
 	 */
 	public void bounceOffBrick(Brick myBrick) {
 		// check if ball hits on top of brick
-		if (myView.getY() + myView.getFitHeight() <= myBrick.getY() + myBrick.getHeight() / 10) {
+		if (myView.getY() + myView.getFitHeight() <= myBrick.getY() + myBrick.getHeight() / 5) {
 			myVelocity = new Point2D(myVelocity.getX(), -myVelocity.getY());
 		}
 		// check if ball hits on bottom of brick
-		else if (myView.getY() >= myBrick.getY() + myBrick.getHeight() * 9 / 10) {
+		else if (myView.getY() >= myBrick.getY() + myBrick.getHeight() * 4 / 5) {
 			myVelocity = new Point2D(myVelocity.getX(), -myVelocity.getY());
 		}
 		// check if ball hits on left of brick
-		else if (myView.getX() + myView.getFitWidth() <= myBrick.getX() + myBrick.getWidth() / 10) {
+		else if (myView.getX() + myView.getFitWidth() <= myBrick.getX() + myBrick.getWidth() / 5) {
 			myVelocity = new Point2D(-myVelocity.getX(), myVelocity.getY());
 		}
 		// check if ball hits on right of brick
-		else if (myView.getX() >= myBrick.getX() + myBrick.getWidth() * 9 / 10) {
+		else if (myView.getX() >= myBrick.getX() + myBrick.getWidth() * 4 / 5) {
 			myVelocity = new Point2D(-myVelocity.getX(), myVelocity.getY());
 		}
 		// System.out.println("hit n/a");
 	}
 
-	public void recenter(double screenWidth, double screenHeight) {
-		myView.setX(screenWidth / 2 - BALL_SIZE / 2);
-		myView.setY(screenHeight / 2 - BALL_SIZE / 2);
-		myVelocity = new Point2D(0,BOUNCER_SPEED);
-		System.out.println(myView.getX() + " , " + myView.getY());
+	
+	/**
+	 * Recentering - release ball after SPACEBAR entered
+	 * @return
+	 */
+	public void recenter(double x, double y) {
+		myView.setX(x);
+		myView.setY(y);
+		myVelocity = new Point2D(0,0);
+//		System.out.println(myView.getX() + " , " + myView.getY());
 	}
+	public void releaseBall(KeyCode code) {
+		// if SPACEBAR entered, release ball
+		myVelocity = new Point2D(0, -BOUNCER_SPEED);
+		System.out.println("release");
+	}
+
 	/**
 	 * Returns internal view of bouncer to interact with other JavaFX methods.
 	 */
