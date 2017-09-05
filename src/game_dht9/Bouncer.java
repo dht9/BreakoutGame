@@ -78,7 +78,7 @@ public class Bouncer {
 			restarted = true;
 			return true;
 		}
-		if (myView.getX() > screenWidth || myView.getX() + myView.getFitWidth() < 0) {
+		if (myView.getX() + myView.getFitWidth()/2 > screenWidth || myView.getX() + myView.getFitWidth()/2 < 0) {
 			restarted = true;
 			return true;
 		}
@@ -112,12 +112,14 @@ public class Bouncer {
 			double ballVy = BOUNCER_SPEED * Math.cos(Math.toRadians(bounceAngle));
 			myVelocity = new Point2D(ballVx, ballVy*(-getSign(myVelocity.getY())));
 		}
+		
 		// check if ball hits left side of paddle
 		else if (myView.getX() + myView.getFitWidth() * 3 / 4 <= myPaddle.myView.getX()) {
 			myVelocity = new Point2D((-BOUNCER_SPEED + myPaddle.myVelocity.getX()) * Math.sin(45),
 					BOUNCER_SPEED * Math.cos(45));
 			System.out.println((-BOUNCER_SPEED + myPaddle.myVelocity.getX()) * Math.sin(45));
 		}
+		
 		// check if ball hits right side of paddle
 		else if (myView.getX() + myView.getFitWidth() / 4 >= myPaddle.myView.getX() + myPaddle.myView.getFitWidth()) {
 			myVelocity = new Point2D((BOUNCER_SPEED + myPaddle.myVelocity.getX()) * Math.sin(45),
