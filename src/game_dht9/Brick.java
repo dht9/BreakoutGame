@@ -8,15 +8,16 @@ public class Brick extends Rectangle {
 	public static final int BRICK_WIDTH = 50;
 	public static final int BRICK_HEIGHT = 25;
 	public static final int BRICK_GAP = 5;
-	Type brickType;
+	
+	private BrickType brickType;
 
-	enum Type {
+	enum BrickType {
 		BARRIER(10, Color.WHITE), INFINITE(8, Color.GRAY), HIGH(3, Color.web("#FF007F")), MEDIUM(2, Color.web("#FF66B2")), LOW(1,
 				Color.web("#FFCCE5")), DESTROYED(0, Color.WHITE);
 		private int health;
 		private Color color;
 
-		Type(int health, Color color) {
+		BrickType(int health, Color color) {
 			this.health = health;
 			this.color = color;
 		}
@@ -29,6 +30,15 @@ public class Brick extends Rectangle {
 			return health;
 		}
 		
+	}
+	
+	public Color getColor() {
+		return brickType.getColor();
+		
+	}
+	
+	public boolean isType(BrickType type) {
+		return type != null && brickType == type;
 	}
 
 	public Brick(double x, double y, int brickNum , int gap) {
@@ -50,22 +60,22 @@ public class Brick extends Rectangle {
 	public void setBrickType(int brickNum) {
 		switch (brickNum) {
 		case 10:
-			this.brickType = Type.BARRIER;
+			this.brickType = BrickType.BARRIER;
 			break;
 		case 8:
-			this.brickType = Type.INFINITE;
+			this.brickType = BrickType.INFINITE;
 			break;
 		case 3:
-			this.brickType = Type.HIGH;
+			this.brickType = BrickType.HIGH;
 			break;
 		case 2:
-			this.brickType = Type.MEDIUM;
+			this.brickType = BrickType.MEDIUM;
 			break;
 		case 1:
-			this.brickType = Type.LOW;
+			this.brickType = BrickType.LOW;
 			break;
 		default:
-			this.brickType = Type.DESTROYED;
+			this.brickType = BrickType.DESTROYED;
 			this.destroyBrick();
 			break;
 		}
@@ -78,14 +88,14 @@ public class Brick extends Rectangle {
 		case 8:
 			break;
 		case 3:
-			this.brickType = Type.MEDIUM;
+			this.brickType = BrickType.MEDIUM;
 			break;
 		case 2:
-			this.brickType = Type.LOW;
+			this.brickType = BrickType.LOW;
 			break;
 		case 1:
 		default:
-			brickType = Type.DESTROYED;
+			brickType = BrickType.DESTROYED;
 //			 System.out.println("BRICK DESTROYED");
 			this.destroyBrick();
 			break;
@@ -97,7 +107,7 @@ public class Brick extends Rectangle {
 		this.setY(-1);
 		this.setWidth(0);
 		this.setHeight(0);
-		brickType = Type.DESTROYED;
+		brickType = BrickType.DESTROYED;
 //		System.out.println("BRICK DESTROYED");
 	}
 

@@ -1,26 +1,25 @@
 package game_dht9;
 
-import game_dht9.Brick.Type;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
-import javafx.scene.paint.Color;
 
 public class Paddle {
+	
 
-	public ImageView myView;
-	private double PADDLE_HEIGHT = 12;
-	private double PADDLE_WIDTH = 120;
 	public static final int PADDLE1_OFFSET = -75;
 	public static final int PADDLE2_OFFSET = 75;
+	public ImageView myView;
+	
+	private double PADDLE_HEIGHT = 12;
+	private double PADDLE_WIDTH = 120;
 	private Point2D myVelocity;
 	private double PADDLE_SPEED = 400;
 	private int isExtended;
-	
-	Type currType;
-	Type prevType;
+	private Type currentPaddleType;
+	private Type previousPaddleType;
 	
 	enum Type {
 		EXTENDED, MAGNETIC, EDGEWARPPED, PLAIN;
@@ -39,26 +38,26 @@ public class Paddle {
 		myView.setY(y);
 		myVelocity = new Point2D(0, 0);
 		isExtended = 0;
-		currType = Type.PLAIN;
+		currentPaddleType = Type.PLAIN;
 	}
 	
 	public void chooseAbility(int num) {
 		switch(num) {
 		case 0:
-			this.prevType = currType;
-			this.currType = Type.EXTENDED;
+			this.previousPaddleType = currentPaddleType;
+			this.currentPaddleType = Type.EXTENDED;
 			break;
 		case 1:
-			this.prevType = currType;
-			this.currType = Type.MAGNETIC;
+			this.previousPaddleType = currentPaddleType;
+			this.currentPaddleType = Type.MAGNETIC;
 			break;
 		case 2:
-			this.prevType = currType;
-			this.currType = Type.EDGEWARPPED;
+			this.previousPaddleType = currentPaddleType;
+			this.currentPaddleType = Type.EDGEWARPPED;
 			break;
 		default:
-			this.prevType = currType;
-			this.currType = Type.PLAIN;
+			this.previousPaddleType = currentPaddleType;
+			this.currentPaddleType = Type.PLAIN;
 			break;
 		}
 	}
@@ -92,7 +91,7 @@ public class Paddle {
 	 */
 	public void move(double elapsedTime) {
 		// if paddle is at edge and is EDGEWARPPED, still enable mobility
-		if(isAtEdge(GameEngine.SCREEN_WIDTH) && currType == Type.EDGEWARPPED) {
+		if(isAtEdge(GameEngine.SCREEN_WIDTH) && currentPaddleType == Type.EDGEWARPPED) {
 			myView.setX(myView.getX() + myVelocity.getX() * elapsedTime);
 		}
 		else {
@@ -137,11 +136,11 @@ public class Paddle {
 	 * Next methods are paddle ABILITIES
 	 */
 	public void enablePaddleAbility() {
-		if (this.currType == Type.EXTENDED && this.isExtended == 0
+		if (this.currentPaddleType == Type.EXTENDED && this.isExtended == 0
 				) {
 			this.doubleExtend();
 		}
-		else if (this.prevType == Type.EXTENDED && this.isExtended == 1) {
+		else if (this.previousPaddleType == Type.EXTENDED && this.isExtended == 1) {
 			// shrink paddle if extended for next level
 			this.doubleShrink();
 		}
@@ -199,6 +198,12 @@ public class Paddle {
 	}
 	public double getVelocityY() {
 		return myVelocity.getY();
+	}
+	public Type getCurrType() {
+		return currentPaddleType;
+	}
+	public boolean isType(Type type) {
+		return type != null && type instanceof Type && currentPaddleType == type;
 	}
 	
 	/**
