@@ -267,7 +267,7 @@ public class GameEngine extends Application {
 					myBouncer.releaseBall(myPaddle2);
 			}
 		} else if (code == KeyCode.B)
-			createBarrier();
+			loadBricks(root,'B');
 		else if (code == KeyCode.N)
 			destroyBarrier();
 		else if (code == KeyCode.L) {
@@ -302,14 +302,13 @@ public class GameEngine extends Application {
 		// update attributes if barrier is not being loaded
 		if (levelNum != 'B') {
 			destroyAllBricks();
-			repositionObjects();
+			resetBallPaddle();
 			decodePaddleAbility(levelNum);
-			currentLevel = levelNum;
-			// update HUD 
+			currentLevel = levelNum; 
 			updateHUD();
 			System.out.println("Welcome to Level: " + levelNum);
 		}
-		createBricks(root, levelNum);
+		readBrickFile(root, levelNum);
 	}
 
 	private void updateHUD() {
@@ -318,7 +317,7 @@ public class GameEngine extends Application {
 		updateCurrentLevelDisplayed();
 	}
 
-	private void createBricks(Group root, int levelNum) {
+	private void readBrickFile(Group root, int levelNum) {
 		Scanner s;
 		int rows, cols, brickGap = Brick.BRICK_GAP;
 		try {
@@ -347,7 +346,7 @@ public class GameEngine extends Application {
 			for (int i = 0; i < rows; i++) {
 				for (int j = 0; j < cols; j++) {
 					board[i][j] = s.nextInt();
-					// System.out.print(board[i][j] + " ");
+					
 					// set bricks in scene, distribute bricks across the screen
 					if (board[i][j] != 0) {
 						myBrick = new Brick(j, i, board[i][j], brickGap);
@@ -386,7 +385,7 @@ public class GameEngine extends Application {
 			team.decrementLives();
 			updateCurrentLivesDisplayed();
 			System.out.println("TEAM LIVES LEFT: " + team.getLives());
-			repositionObjects();
+			resetBallPaddle();
 		}
 	}
 
@@ -418,16 +417,16 @@ public class GameEngine extends Application {
 				destroyAllBricks();
 				currentLevel++;
 				loadBricks(root, currentLevel);
-				repositionObjects();
+				resetBallPaddle();
 			}
 			return;
 		}
 	}
 
 	/**
-	 * Reset the ball and paddles
+	 * Reset the ball and paddles to starting positions
 	 */
-	public void repositionObjects() {
+	public void resetBallPaddle() {
 		myPaddle1.reposition(SCREEN_WIDTH / 2 - myPaddle1.getWidth() / 2);
 		myPaddle2.reposition(SCREEN_WIDTH / 2 - myPaddle2.getWidth() / 2);
 		myBouncer.reposition(
@@ -439,10 +438,6 @@ public class GameEngine extends Application {
 	/**
 	 * Cheat Key Methods
 	 */
-	public void createBarrier() {
-		loadBricks(root, 'B');
-	}
-
 	public void destroyBarrier() {
 		for (Brick b : myBricks) {
 			if (b.isType(BrickType.BARRIER))
