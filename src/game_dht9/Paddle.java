@@ -22,7 +22,7 @@ public class Paddle {
 	private Type previousPaddleType;
 	
 	enum Type {
-		EXTENDED, MAGNETIC, EDGEWARP, PLAIN;
+		EXTENDED, STICKY, EDGEWARP, PLAIN;
 	}
 	
 	/**
@@ -49,7 +49,7 @@ public class Paddle {
 			break;
 		case 1:
 			this.previousPaddleType = currentPaddleType;
-			this.currentPaddleType = Type.MAGNETIC;
+			this.currentPaddleType = Type.STICKY;
 			break;
 		case 2:
 			this.previousPaddleType = currentPaddleType;
@@ -212,17 +212,4 @@ public class Paddle {
 	public Node getView() {
 		return myView;
 	}
-	
-	
-	
-	
-//	public void checkExtensionPaddle1(KeyCode code) {
-//	// check if 'x' is enter for paddle extension toggle
-//	if (code == KeyCode.X) {
-//		if(isExtended == 0)
-//			doubleExtend();
-//		else
-//			doubleShrink();
-//	}
-//}
 }
