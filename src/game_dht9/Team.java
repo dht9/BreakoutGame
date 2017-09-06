@@ -1,8 +1,8 @@
 package game_dht9;
 
 public class Team {
-	public int lives;
-	public int score;
+	private int lives;
+	private int score;
 	
 	public Team() {
 		lives = 3;
@@ -17,6 +17,18 @@ public class Team {
 	public void addLife() {
 		lives++;
 		System.out.println("Added 1 Life");
+	}
+	
+	public void resetLives() {
+		lives = 3;
+	}
+	
+	public boolean livesEqualTo(int val) {
+		return lives == val;
+	}
+	
+	public int getLives() {
+		return lives;
 	}
 
 }
