@@ -50,18 +50,17 @@ import java.io.FileNotFoundException;
  * @author David Tran
  */
 public class GameEngine extends Application {
-	public static final String TITLE = "JavaFX: Initial Game";
+	public static final String TITLE = "JavaFX: Breakout Game";
 	public static final String BALL_IMAGE = "ball.gif";
 	public static final String PADDLE_IMAGE = "paddle.gif";
-	public static final int SCREEN_WIDTH = 1004; // 504 prev
+	public static final int SCREEN_WIDTH = 1004;
 	public static final int SCREEN_HEIGHT = 700;
 	public static final Paint BACKGROUND = Color.BLACK;
 	public static final int FRAMES_PER_SECOND = 120;
 	public static final int MILLISECOND_DELAY = 1000 / FRAMES_PER_SECOND;
 	public static final double SECOND_DELAY = 1.0 / FRAMES_PER_SECOND;
-	public static final int KEY_INPUT_SPEED = 10;
-	public static final double GROWTH_RATE = 1.1;
-	public static final int HEADER_SPACING = 25;
+//	public static final int KEY_INPUT_SPEED = 10;
+//	public static final double GROWTH_RATE = 1.1;
 
 	private Scene myScene;
 	private Bouncer myBouncer;
@@ -74,7 +73,6 @@ public class GameEngine extends Application {
 	private Group root;
 	private int currentLevel = 1;
 	private int numLevels = 4;
-	
 
 	private IntegerProperty teamLives = new SimpleIntegerProperty(0);
 	private IntegerProperty level = new SimpleIntegerProperty(0);
@@ -82,40 +80,18 @@ public class GameEngine extends Application {
 
 	/**
 	 * Initialize what will be displayed and how it will be updated.
+	 * 
+	 * start() setupGame(), and step() methods inspired by Duvall at
+	 * https://coursework.cs.duke.edu/CompSci308_2017Fall/lab_bounce/blob/master/src/ExampleBounce.java
 	 */
-
+	
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-		// attach scene to the stage and display it
-
 		// create one top level collection to organize the things in the scene
 		root = new Group();
-		//
+		Scene level1 = setupGame(root, SCREEN_WIDTH, SCREEN_HEIGHT, BACKGROUND, currentLevel);
 		
-		
-		Scene level1 = setupGame(root, SCREEN_WIDTH, SCREEN_HEIGHT, BACKGROUND, 1);
-
-		BorderPane border = new BorderPane();
-		border.setPrefHeight(SCREEN_HEIGHT - Brick.BRICK_HEIGHT);
-        border.setPrefWidth(SCREEN_WIDTH);
-        
-		HBox hboxLevel = createLabel("Level: ", level);
-		border.setLeft(hboxLevel);
-		HBox hboxLives = createLabel("Team Lives Remaining: ", teamLives);
-		border.setRight(hboxLives);
-		HBox hboxPaddle = createLabel("Paddle Ability: ", paddleAbility);
-		border.setBottom(hboxPaddle);
-		
-		root.getChildren().addAll(border);
-//		// used to update level number
-//		EventHandler<KeyEvent> eventHandlerTextField = new EventHandler<KeyEvent>() {
-//			@Override
-//			public void handle(KeyEvent event) {
-//				myLabel.setText("Level: " + currentLevel);
-//			}
-//		};
-//		myScene.addEventHandler(KeyEvent.KEY_TYPED, eventHandlerTextField);
-			
+		// attach scene to the stage and display it
 		primaryStage.setScene(level1);
 		primaryStage.setTitle(TITLE);
 		primaryStage.show();
@@ -126,6 +102,14 @@ public class GameEngine extends Application {
 		animation.setCycleCount(Timeline.INDEFINITE);
 		animation.getKeyFrames().add(frame);
 		animation.play();
+	}
+
+	private void createPaddleAbilitySequence() {
+		// set random order of paddle abilities for each level
+		for (int i = 0; i < 3; i++) {
+			abilitySequence.add(i);
+		}
+		Collections.shuffle(abilitySequence);
 	}
 
 	private HBox createLabel(String description, Object value) {
@@ -140,7 +124,6 @@ public class GameEngine extends Application {
 			val.setTextFill(Color.YELLOW);
 			val.textProperty().bind(((IntegerProperty) value).asString());
 			hbox.getChildren().addAll(label, val);
-			
 		}
 		else if (value != null && value instanceof StringProperty) {
 			val = new Label();
@@ -148,85 +131,81 @@ public class GameEngine extends Application {
 			val.setTextFill(Color.YELLOW);
 			val.textProperty().bind(((StringProperty) value));
 			hbox.getChildren().addAll(label, val);
-
 		}
-		
 		return hbox;
 	}
 
-	// Create the game's "scene": what shapes will be in the game and their starting
-	// properties
+	// Create the game's "scene": what shapes will be in the game and their starting properties
 	private Scene setupGame(Group root, int width, int height, Paint background, int levelNum) {
 
-		// make some shapes and set their properties
-		team = new Team();
-		updateCurrentLivesDisplayed();
-
-		Image paddleImage = new Image(getClass().getClassLoader().getResourceAsStream(PADDLE_IMAGE));
-		myPaddle1 = new Paddle(paddleImage, SCREEN_HEIGHT + Paddle.PADDLE1_OFFSET);
-		myPaddle2 = new Paddle(paddleImage, Paddle.PADDLE2_OFFSET);
-		updateCurrentAbilityDisplayed();
-
+		// create objects and set their properties
 		Image ballImage = new Image(getClass().getClassLoader().getResourceAsStream(BALL_IMAGE));
+		Image paddleImage = new Image(getClass().getClassLoader().getResourceAsStream(PADDLE_IMAGE));
+		
 		myBouncer = new Bouncer(ballImage, width, height);
+		myPaddle1 = new Paddle(paddleImage, SCREEN_HEIGHT + Paddle.PADDLE1_OFFSET);
+		myPaddle2 = new Paddle(paddleImage, Paddle.PADDLE2_OFFSET);	
+		createPaddleAbilitySequence();
+		team = new Team();
 
+		// load bricks into scene
+		loadBricks(root, levelNum);
+		
+		// create labels for the interface
+		BorderPane border = new BorderPane();
+		border.setPrefHeight(SCREEN_HEIGHT - Brick.BRICK_HEIGHT);
+        border.setPrefWidth(SCREEN_WIDTH);
+		HBox hboxLevel = createLabel("Level: ", level);
+		border.setLeft(hboxLevel);
+		HBox hboxLives = createLabel("Team Lives Remaining: ", teamLives);
+		border.setRight(hboxLives);
+		HBox hboxPaddle = createLabel("Paddle Ability: ", paddleAbility);
+		border.setBottom(hboxPaddle);
+		
 		root.getChildren().add(myBouncer.getView());
 		root.getChildren().add(myPaddle1.getView());
 		root.getChildren().add(myPaddle2.getView());
-
-		// set random order of paddle abilities for each level
-		for (int i = 0; i < 3; i++) {
-			abilitySequence.add(i);
-		}
-		Collections.shuffle(abilitySequence);
-
-		loadBrickLevel(root, levelNum);
-		level.set(currentLevel);
-		
-		
+		root.getChildren().addAll(border);
+		updateHUD();
 		
 		// create a place to see the shapes
 		myScene = new Scene(root, width, height, background);
 		myScene.setOnKeyPressed(e -> handleKeyInput(e.getCode()));
 		myScene.setOnKeyReleased(e -> handleKeyRelease(e.getCode()));
 
-		
-
 		return myScene;
 	}
 
+	/**
+	 * Update attributes
+	 */
 	private void step(double elapsedTime) {
-		// update attributes
-		System.out.println(currentLevel);
-		// can you do this locally in Bouncer.java?
+		
+		// if ball is not moving, reposition it in the center of paddle1
 		if (myBouncer.getVelocityY() == 0 && myBouncer.hasRestarted()) {
-			myBouncer.reposition(
-					myPaddle1.myView.getX() + myPaddle1.getWidth() / 2 - myBouncer.myView.getFitWidth() / 2,
+			myBouncer.reposition(myPaddle1.myView.getX() + myPaddle1.getWidth() / 2 - myBouncer.myView.getFitWidth() / 2,
 					SCREEN_HEIGHT - myBouncer.myView.getFitHeight() + Paddle.PADDLE1_OFFSET - 1);
 		}
 
-		// move ball with paddle once magnetized by lower paddle
-		else if (myBouncer.getVelocityY() == 0 && !myBouncer.hasRestarted() && myBouncer.isInBottomHalf()) {
-			myBouncer.reposition(myBouncer.myView.getX() + myPaddle1.getVelocityX() * elapsedTime,
-					myBouncer.myView.getY());
+		// if ball is magnetized by paddle, stick it to paddle
+		else if (myBouncer.getVelocityY() == 0 && !myBouncer.hasRestarted()) {
+			if (myBouncer.isInBottomHalf())
+				myBouncer.reposition(myBouncer.myView.getX() + myPaddle1.getVelocityX() * elapsedTime,
+						myBouncer.myView.getY());
+			else
+				myBouncer.reposition(myBouncer.myView.getX() + myPaddle2.getVelocityX() * elapsedTime,
+						myBouncer.myView.getY());
 		}
 
-		// move ball with paddle once magnetized by upper paddle
-		else if (myBouncer.getVelocityY() == 0 && !myBouncer.hasRestarted() && !myBouncer.isInBottomHalf()) {
-			myBouncer.reposition(myBouncer.myView.getX() + myPaddle2.getVelocityX() * elapsedTime,
-					myBouncer.myView.getY());
-		}
-
-		// if ball is not magnetised or has restarted, ball is in movement
-		// move ball and check intersections
+		// if ball is not magnetized or has not recentered, move the ball
 		else {
 			myBouncer.move(elapsedTime);
 			myBouncer.bounce();
 
-			if (team.lives == 0) {
-				loadBrickLevel(root, currentLevel);
+			if (team.livesEqualTo(0)) {
+				loadBricks(root, 1);
 				System.out.println("YOU LOSE");
-				team.lives = 3;
+				team.resetLives();
 				updateCurrentLivesDisplayed();
 			}
 
@@ -253,7 +232,7 @@ public class GameEngine extends Application {
 		if (myBouncer.getView().getBoundsInParent().intersects(myPaddle1.getView().getBoundsInParent())) {
 
 			// if paddle is not magnetic, bounce ball
-			if (!(myPaddle1.isType(Type.MAGNETIC)))
+			if (!(myPaddle1.isType(Type.STICKY)))
 				myBouncer.bounceOffPaddle(myPaddle1, SCREEN_HEIGHT);
 			else {
 				myBouncer.reposition(myBouncer.myView.getX(),
@@ -264,7 +243,7 @@ public class GameEngine extends Application {
 		if (myBouncer.getView().getBoundsInParent().intersects(myPaddle2.getView().getBoundsInParent())) {
 
 			// if paddle is not magnetic, bounce ball
-			if (!(myPaddle1.isType(Type.MAGNETIC)))
+			if (!(myPaddle1.isType(Type.STICKY)))
 				myBouncer.bounceOffPaddle(myPaddle2, SCREEN_HEIGHT);
 			else
 				myBouncer.reposition(myBouncer.myView.getX(),
@@ -319,16 +298,24 @@ public class GameEngine extends Application {
 	/**
 	 * Load a level with bricks
 	 */
-	private void loadBrickLevel(Group root, int levelNum) {
+	private void loadBricks(Group root, int levelNum) {
 		// update attributes if barrier is not being loaded
 		if (levelNum != 'B') {
 			destroyAllBricks();
 			repositionObjects();
-			setPaddleAbility(levelNum);
-			updateCurrentAbilityDisplayed();
+			decodePaddleAbility(levelNum);
+			currentLevel = levelNum;
+			// update HUD 
+			updateHUD();
 			System.out.println("Welcome to Level: " + levelNum);
 		}
 		createBricks(root, levelNum);
+	}
+
+	private void updateHUD() {
+		updateCurrentAbilityDisplayed();
+		updateCurrentLivesDisplayed();
+		updateCurrentLevelDisplayed();
 	}
 
 	private void createBricks(Group root, int levelNum) {
@@ -383,7 +370,7 @@ public class GameEngine extends Application {
 		}
 	}
 
-	private void setPaddleAbility(int levelNum) {
+	private void decodePaddleAbility(int levelNum) {
 		if (levelNum - 1 >= 0 && levelNum - 1 < abilitySequence.size()) {
 			myPaddle1.chooseAbility(abilitySequence.get(levelNum - 1));
 			myPaddle2.chooseAbility(abilitySequence.get(levelNum - 1));
@@ -398,7 +385,7 @@ public class GameEngine extends Application {
 			myBouncer.stop();
 			team.decrementLives();
 			updateCurrentLivesDisplayed();
-			System.out.println("TEAM LIVES LEFT: " + team.lives);
+			System.out.println("TEAM LIVES LEFT: " + team.getLives());
 			repositionObjects();
 		}
 	}
@@ -430,8 +417,7 @@ public class GameEngine extends Application {
 				System.out.println("YOU WIN");
 				destroyAllBricks();
 				currentLevel++;
-				updateCurrentLevelDisplayed();
-				loadBrickLevel(root, currentLevel);
+				loadBricks(root, currentLevel);
 				repositionObjects();
 			}
 			return;
@@ -454,7 +440,7 @@ public class GameEngine extends Application {
 	 * Cheat Key Methods
 	 */
 	public void createBarrier() {
-		loadBrickLevel(root, 'B');
+		loadBricks(root, 'B');
 	}
 
 	public void destroyBarrier() {
@@ -468,8 +454,7 @@ public class GameEngine extends Application {
 		// if not at first level, load previous level
 		if (currentLevel >= 2) {
 			currentLevel--;
-			updateCurrentLevelDisplayed();
-			loadBrickLevel(root, currentLevel);
+			loadBricks(root, currentLevel);
 		}
 	}
 
@@ -477,8 +462,7 @@ public class GameEngine extends Application {
 		// if not at last level, load next level
 		if (currentLevel < numLevels) {
 			currentLevel++;
-			updateCurrentLevelDisplayed();
-			loadBrickLevel(root, currentLevel);
+			loadBricks(root, currentLevel);
 		}
 	}
 
@@ -497,7 +481,7 @@ public class GameEngine extends Application {
 	}
 	
 	 public final void updateCurrentLevelDisplayed(){level.set(currentLevel);}
-	 public final void updateCurrentLivesDisplayed(){teamLives.set(team.lives);}
+	 public final void updateCurrentLivesDisplayed(){teamLives.set(team.getLives());}
 	 public final void updateCurrentAbilityDisplayed(){paddleAbility.set(myPaddle1.getCurrType().toString());}
 
 	/**
