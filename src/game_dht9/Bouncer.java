@@ -16,6 +16,7 @@ import javafx.scene.image.ImageView;
 public class Bouncer {
 
 	public ImageView myView;
+	
 	private Point2D myVelocity;
 	private double BALL_SIZE = 20; // 16 for symmetry
 	private double MAX_BOUNCE_ANGLE = 60;

@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
 
+import game_dht9.Brick.BrickType;
 import game_dht9.Paddle.Type;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -52,7 +53,7 @@ public class GameEngine extends Application {
 
 	private Scene myScene;
 	private Bouncer myBouncer;
-	private Player player;
+	private Team team;
 	private Paddle myPaddle1;
 	private Paddle myPaddle2;
 	private Brick myBrick;
@@ -99,7 +100,7 @@ public class GameEngine extends Application {
 	private Scene setupGame(Group root, int width, int height, Paint background, int levelNum) {
 
 		// make some shapes and set their properties
-		player = new Player();
+		team = new Team();
 
 		Image paddleImage = new Image(getClass().getClassLoader().getResourceAsStream(PADDLE_IMAGE));
 		myPaddle1 = new Paddle(paddleImage, SCREEN_HEIGHT + Paddle.PADDLE1_OFFSET);
@@ -154,10 +155,10 @@ public class GameEngine extends Application {
 			myBouncer.move(elapsedTime);
 			myBouncer.bounce();
 		
-			if (player.lives == 0) {
+			if (team.lives == 0) {
 				loadBrickLevel(root, currentLevel);
 				System.out.println("YOU LOSE");
-				player.lives = 3;
+				team.lives = 3;
 			}
 			
 			checkOutOfBounds();
@@ -170,7 +171,7 @@ public class GameEngine extends Application {
 		myPaddle2.move(elapsedTime);
 		
 		// Edge Warp Paddles if paddle has edge-warp ability
-		if (myPaddle1.currType.toString().equals("EDGEWARPPED")) {
+		if (myPaddle1.isType(Type.EDGEWARPPED)) {
 			myPaddle1.edgeWarp();
 			myPaddle2.edgeWarp();
 		}
@@ -184,7 +185,7 @@ public class GameEngine extends Application {
 		if (myBouncer.getView().getBoundsInParent().intersects(myPaddle1.getView().getBoundsInParent())) {
 			
 			// if paddle is not magnetic, bounce ball
-			if (!myPaddle1.currType.toString().equals("MAGNETIC"))
+			if (!(myPaddle1.isType(Type.MAGNETIC)))
 				myBouncer.bounceOffPaddle(myPaddle1, SCREEN_HEIGHT);
 			else {
 				myBouncer.reposition(myBouncer.myView.getX(),
@@ -195,7 +196,7 @@ public class GameEngine extends Application {
 		if (myBouncer.getView().getBoundsInParent().intersects(myPaddle2.getView().getBoundsInParent())) {
 			
 			// if paddle is not magnetic, bounce ball
-			if (!myPaddle1.currType.toString().equals("MAGNETIC"))
+			if (!(myPaddle1.isType(Type.MAGNETIC)))
 				myBouncer.bounceOffPaddle(myPaddle2, SCREEN_HEIGHT);
 			else
 				myBouncer.reposition(myBouncer.myView.getX(),
@@ -224,7 +225,7 @@ public class GameEngine extends Application {
 		else if (code == KeyCode.N)
 			destroyBarrier();
 		else if (code == KeyCode.L)
-			addTeamLives();
+			team.addLife();
 		else if (code == KeyCode.SHIFT) {
 			myPaddle1.doubleExtend();
 			myPaddle2.doubleExtend();
@@ -293,7 +294,7 @@ public class GameEngine extends Application {
 					if (board[i][j] != 0) {
 						myBrick = new Brick(j, i, board[i][j], brickGap);
 						myBricks.add(myBrick);
-						myBrick.setFill(myBrick.brickType.getColor());
+						myBrick.setFill(myBrick.getColor());
 						root.getChildren().add(myBrick);
 					}
 				}
@@ -315,7 +316,7 @@ public class GameEngine extends Application {
 		if (levelNum - 1 >= 0 && levelNum - 1 < abilitySequence.size()) {
 			myPaddle1.chooseAbility(abilitySequence.get(levelNum - 1));
 			myPaddle2.chooseAbility(abilitySequence.get(levelNum - 1));
-			System.out.println("Paddle Ability: " + myPaddle1.currType);
+			System.out.println("Paddle Ability: " + myPaddle1.getCurrType());
 		}
 		myPaddle1.enablePaddleAbility();
 		myPaddle2.enablePaddleAbility();
@@ -324,8 +325,8 @@ public class GameEngine extends Application {
 	public void checkOutOfBounds() {
 		if (myBouncer.outOfBounds()) {
 			myBouncer.stop();
-			player.decrementLives();
-			System.out.println("TEAM LIVES LEFT: " + player.lives);
+			team.decrementLives();
+			System.out.println("TEAM LIVES LEFT: " + team.lives);
 			repositionObjects();
 		}
 	}
@@ -344,11 +345,11 @@ public class GameEngine extends Application {
 					myBouncer.bounceOffBrick(myBrick);
 				}
 				myBrick.decrementType();
-				myBrick.setFill(myBrick.brickType.getColor());
+				myBrick.setFill(myBrick.getColor());
 			}
 			// count non-permanent bricks left
-			if ((!myBrick.brickType.toString().equals("INFINITE") && !(myBrick.brickType.toString().equals("DESTROYED"))
-					&& !(myBrick.brickType.toString().equals("BARRIER")))) {
+			if ((!myBrick.isType(BrickType.INFINITE)) && !(myBrick.isType(BrickType.DESTROYED))
+					&& !(myBrick.isType(BrickType.BARRIER))) {
 				bricksLeft++;
 			}
 		}
@@ -385,14 +386,11 @@ public class GameEngine extends Application {
 	}
 	public void destroyBarrier() {
 		for (Brick b : myBricks) {
-			if (b.brickType.toString().equals("BARRIER"))
+			if (b.isType(BrickType.BARRIER))
 				b.destroyBrick();
 		}
 	}
-	public void addTeamLives() {
-		player.lives++;
-		System.out.println("Added Team 1 Life");
-	}
+
 	public void recedeToPreviousLevel() {
 		// if not at first level, load previous level
 		if (currentLevel >= 2) {
