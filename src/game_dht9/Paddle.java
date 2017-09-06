@@ -22,7 +22,7 @@ public class Paddle {
 	private Type previousPaddleType;
 	
 	enum Type {
-		EXTENDED, MAGNETIC, EDGEWARPPED, PLAIN;
+		EXTENDED, MAGNETIC, EDGEWARP, PLAIN;
 	}
 	
 	/**
@@ -53,7 +53,7 @@ public class Paddle {
 			break;
 		case 2:
 			this.previousPaddleType = currentPaddleType;
-			this.currentPaddleType = Type.EDGEWARPPED;
+			this.currentPaddleType = Type.EDGEWARP;
 			break;
 		default:
 			this.previousPaddleType = currentPaddleType;
@@ -91,7 +91,7 @@ public class Paddle {
 	 */
 	public void move(double elapsedTime) {
 		// if paddle is at edge and is EDGEWARPPED, still enable mobility
-		if(isAtEdge(GameEngine.SCREEN_WIDTH) && currentPaddleType == Type.EDGEWARPPED) {
+		if(isAtEdge(GameEngine.SCREEN_WIDTH) && currentPaddleType == Type.EDGEWARP) {
 			myView.setX(myView.getX() + myVelocity.getX() * elapsedTime);
 		}
 		else {
@@ -204,7 +204,7 @@ public class Paddle {
 	}
 	public boolean isType(Type type) {
 		return type != null && type instanceof Type && currentPaddleType == type;
-	}
+	} 
 	
 	/**
 	 * Returns internal view of bouncer to interact with other JavaFX methods.
