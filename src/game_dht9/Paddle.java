@@ -10,12 +10,14 @@ import javafx.scene.paint.Color;
 
 public class Paddle {
 
-	ImageView myView;
-	public double PADDLE_HEIGHT = 12;
-	public double PADDLE_WIDTH = 120;
-	public Point2D myVelocity;
+	public ImageView myView;
+	private double PADDLE_HEIGHT = 12;
+	private double PADDLE_WIDTH = 120;
+	public static final int PADDLE1_OFFSET = -75;
+	public static final int PADDLE2_OFFSET = 75;
+	private Point2D myVelocity;
 	private double PADDLE_SPEED = 400;
-	public int isExtended;
+	private int isExtended;
 	
 	Type currType;
 	Type prevType;
@@ -27,14 +29,14 @@ public class Paddle {
 	/**
 	 * Create a paddle from a given image.
 	 */
-	public Paddle(Image image, double screenWidth, double screenHeight) {
+	public Paddle(Image image, double y) {
 		// set paddle attributes
 		myView = new ImageView(image);
 		myView.setFitWidth(PADDLE_WIDTH);
 		myView.setFitHeight(PADDLE_HEIGHT);
 		// set paddle starting position
-		myView.setX(screenWidth - PADDLE_WIDTH/2);
-		myView.setY(screenHeight - 75);
+		myView.setX(GameEngine.SCREEN_WIDTH/2 - PADDLE_WIDTH/2);
+		myView.setY(y);
 		myVelocity = new Point2D(0, 0);
 		isExtended = 0;
 		currType = Type.PLAIN;
@@ -67,9 +69,9 @@ public class Paddle {
 	 */
 	public void startPaddle1(KeyCode code) {
 		// allows paddle1 to move and stop at screen edge
-		if (code == KeyCode.RIGHT && !isAtRightEdge(GameEngine.SCREEN_WIDTH)) {
+		if (code == KeyCode.RIGHT && !isAtRightEdge()) {
 			myVelocity = new Point2D(PADDLE_SPEED, 0);
-		} else if (code == KeyCode.LEFT && !isAtLeftEdge(GameEngine.SCREEN_WIDTH)) {
+		} else if (code == KeyCode.LEFT && !isAtLeftEdge()) {
 			myVelocity = new Point2D(-PADDLE_SPEED, 0);
 		}
 	}
@@ -78,9 +80,9 @@ public class Paddle {
 	 * Give Paddle2 velocity when key pressed.
 	 */
 	public void startPaddle2(KeyCode code) {
-		if (code == KeyCode.D && !isAtRightEdge(GameEngine.SCREEN_WIDTH)) {
+		if (code == KeyCode.D && !isAtRightEdge()) {
 			myVelocity = new Point2D(PADDLE_SPEED, 0);
-		} else if (code == KeyCode.A && !isAtLeftEdge(GameEngine.SCREEN_WIDTH)) {
+		} else if (code == KeyCode.A && !isAtLeftEdge()) {
 			myVelocity = new Point2D(-PADDLE_SPEED, 0);
 		}
 	}
@@ -88,9 +90,9 @@ public class Paddle {
 	/**
 	 * Maintain paddle velocity in frames.
 	 */
-	public void move(double elapsedTime, double screenWidth) {
+	public void move(double elapsedTime) {
 		// if paddle is at edge and is EDGEWARPPED, still enable mobility
-		if(isAtEdge(screenWidth) && currType == Type.EDGEWARPPED) {
+		if(isAtEdge(GameEngine.SCREEN_WIDTH) && currType == Type.EDGEWARPPED) {
 			myView.setX(myView.getX() + myVelocity.getX() * elapsedTime);
 		}
 		else {
@@ -125,7 +127,7 @@ public class Paddle {
 	/**
 	 * Stop Paddle 1 if it hits the screen edge
 	 */
-	public void stopPaddleAtEdge(double screenWidth) {
+	public void stopPaddleAtEdge() {
 		// if paddle touches left edge
 		if(myView.getX() <= 0 || myView.getX()+myView.getFitWidth() >= GameEngine.SCREEN_WIDTH)
 			myVelocity = new Point2D(0,0);
@@ -159,47 +161,45 @@ public class Paddle {
 		myView.setX(myView.getX()+PADDLE_WIDTH/2);
 		isExtended = 0;
 	}
-	public void edgeWarp(double screenWidth) {
-		if(myView.getX() > screenWidth) {
-			myView.setX(0-myView.getFitWidth()*9/10);
+	public void edgeWarp() {
+		if(myView.getX() > GameEngine.SCREEN_WIDTH) {
+			myView.setX(0);
 		}
 		else if(myView.getX() + myView.getFitWidth()	< 0) {
-			myView.setX(screenWidth - myView.getFitWidth()*1/10);
+			myView.setX(GameEngine.SCREEN_WIDTH - myView.getFitWidth());
 		}
 	}
 
 	
 	
-	public void recenter(double x) {
+	public void reposition(double x) {
 		myView.setX(x);
 		myVelocity = new Point2D(0, 0);
 	}
 	public boolean isAtEdge(double screenWidth) {
 		// check for right screen edge 
-		if(isAtRightEdge(screenWidth))
-			return true;
-		else if(isAtLeftEdge(screenWidth))
-			return true;
-		return false;
+		return (isAtRightEdge() || isAtLeftEdge());
 	}
-	public boolean isAtLeftEdge(double screenWidth) {
+	public boolean isAtLeftEdge() {
 		// check for left screen edge 
-		if(myView.getX() <= 0)
-			return true;
-		return false;
+		return myView.getX() <= 0;
 	}
-	public boolean isAtRightEdge(double screenWidth) {
+	public boolean isAtRightEdge() {
 		// check for right screen edge 
-		if(myView.getX() + myView.getFitWidth() >= screenWidth)
-			return true;
-		return false;
+		return myView.getX() + myView.getFitWidth() >= GameEngine.SCREEN_WIDTH;
 	}
-	
 	public double getWidth() {
 		return this.myView.getFitWidth();	
 	}
-	
-	
+	public double getHeight() {
+		return this.myView.getFitHeight();	
+	}
+	public double getVelocityX() {
+		return myVelocity.getX();
+	}
+	public double getVelocityY() {
+		return myVelocity.getY();
+	}
 	
 	/**
 	 * Returns internal view of bouncer to interact with other JavaFX methods.

@@ -5,8 +5,9 @@ import javafx.scene.shape.Rectangle;
 
 public class Brick extends Rectangle {
 
-	public int BRICK_WIDTH = 50;
-	public int BRICK_HEIGHT = 25;
+	public static final int BRICK_WIDTH = 50;
+	public static final int BRICK_HEIGHT = 25;
+	public static final int BRICK_GAP = 5;
 	Type brickType;
 
 	enum Type {
@@ -30,14 +31,14 @@ public class Brick extends Rectangle {
 		
 	}
 
-	public Brick(double x, double y, int brickNum) {
+	public Brick(double x, double y, int brickNum , int gap) {
 		// set brick location
-		this.setX(x * BRICK_WIDTH + 5);
+		this.setX(x * BRICK_WIDTH + gap);
 		this.setY(y * BRICK_HEIGHT);
 
 		// set brick attributes
-		this.setWidth(BRICK_WIDTH - 5);
-		this.setHeight(BRICK_HEIGHT - 5);
+		this.setWidth(BRICK_WIDTH - gap);
+		this.setHeight(BRICK_HEIGHT - gap);
 
 		// set brick health
 		this.setBrickType(brickNum);
