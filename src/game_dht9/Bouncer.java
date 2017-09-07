@@ -6,114 +6,67 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
 /**
- * Bouncer used in Breakout Game
+ * Bouncer class used in Breakout Game
  * 
- * This class inspired by: 
+ * This class was inspired by:
  * https://coursework.cs.duke.edu/CompSci308_2017Fall/lab_bounce/blob/master/src/Bouncer.java
  * 
- * @author David Tran
+ * @author David Tran (dht9)
  */
 public class Bouncer {
 
 	public ImageView myView;
-	
 	private Point2D myVelocity;
-	private double BALL_SIZE = 20; // 16 for symmetry
-	private double MAX_BOUNCE_ANGLE = 60;
-	private double BOUNCER_SPEED = 350;
-	private boolean restarted;
+	private static final double BOUNCER_SIZE = 18; // 16 for symmetry
+	private static final double MAX_BOUNCE_ANGLE = 60;
+	private static final double BOUNCER_SPEED = 250;
+	private boolean hasReset;
 
 	/**
-	 * Create a bouncer from a given image.
+	 * Initialize bouncer attributes.
 	 */
 	public Bouncer(Image image, double screenWidth, double screenHeight) {
 		myView = new ImageView(image);
 		// make sure it stays a circle
-		myView.setFitWidth(BALL_SIZE);
-		myView.setFitHeight(BALL_SIZE);
+		myView.setFitWidth(BOUNCER_SIZE);
+		myView.setFitHeight(BOUNCER_SIZE);
 		// make sure it stays within the bounds
 		myView.setX(-1);
 		myView.setY(-1);
 		// turn speed into velocity that can be updated on bounces
 		myVelocity = new Point2D(0, 0);
-		restarted = true;
-	}
-	
-	public double getVelocityX() {
-		return myVelocity.getX();
-	}
-	public double getVelocityY() {
-		return myVelocity.getY();
-	}
-	public  boolean hasRestarted() {
-		return restarted;
+		hasReset = true;
 	}
 
 	/**
-	 * Move by taking one step based on its velocity.
 	 * 
-	 * Note, elapsedTime is used to ensure consistent speed across different
-	 * machines.
+	 * Update the movement of the bouncer.
+	 * 
 	 */
 	public void move(double elapsedTime) {
 		myView.setX(myView.getX() + myVelocity.getX() * elapsedTime);
 		myView.setY(myView.getY() + myVelocity.getY() * elapsedTime);
 	}
 
-	/**
-	 * Bounce off the walls represented by the edges of the screen.
-	 */
 	public void bounce() {
 		// collide all bouncers against the walls
 		if (myView.getX() < 0 || myView.getX() > GameEngine.SCREEN_WIDTH - myView.getBoundsInLocal().getWidth()) {
 			myVelocity = new Point2D(-myVelocity.getX(), myVelocity.getY());
 		}
 	}
-	
-	/**
-	 * Check if ball is out-of-bounds
-	 */
-	public boolean outOfBounds() {
-		restarted = myView.getY() > GameEngine.SCREEN_HEIGHT || myView.getY() + myView.getFitHeight() < 0 || 
-				myView.getX() + myView.getFitWidth()/2 > GameEngine.SCREEN_WIDTH || myView.getX() + myView.getFitWidth()/2 < 0;
-		return restarted;
-	}
 
-	/**
-	 * Bounce off the paddle.
-	 */
 	public void bounceOffPaddle(Paddle myPaddle, double screenHeight) {
 		// check if ball hits top or bottom of paddle
 		if (myView.getY() + myView.getFitHeight() <= myPaddle.getY() + myPaddle.getHeight() / 2
 				|| myView.getY() >= myPaddle.getY() + myPaddle.getHeight() / 2) {
-			// calculate distance between ball and paddle center
-			double distFromCenter = myView.getX() + myView.getFitWidth() / 2
-					- (myPaddle.getX() + myPaddle.getWidth() / 2);
-			if(distFromCenter == 0 && isInBottomHalf()) {
-				myVelocity = new Point2D(0, -BOUNCER_SPEED);
-				return;
-			}
-			else if(distFromCenter == 0 && !isInBottomHalf()) {
-				myVelocity = new Point2D(0, BOUNCER_SPEED);
-				return;
-			}
-			System.out.println(distFromCenter);
-			// normalize the distance [-1,1]
-			double normalizedDistFromCenter = distFromCenter / (myPaddle.getWidth() / 2);
-			// calculate angle ball will bounce
-			double bounceAngle = normalizedDistFromCenter * MAX_BOUNCE_ANGLE;
-			double ballVx = BOUNCER_SPEED * Math.sin(Math.toRadians(bounceAngle));
-			double ballVy = BOUNCER_SPEED * Math.cos(Math.toRadians(bounceAngle));
-			myVelocity = new Point2D(ballVx, ballVy*(-getSign(myVelocity.getY())));
+			calcBounceVelocity(myPaddle);
 		}
-		
 		// check if ball hits left side of paddle
 		else if (myView.getX() + myView.getFitWidth() * 3 / 4 <= myPaddle.getX()) {
 			myVelocity = new Point2D((-BOUNCER_SPEED + myPaddle.getVelocityX()) * Math.sin(45),
 					BOUNCER_SPEED * Math.cos(45));
 			System.out.println((-BOUNCER_SPEED + myPaddle.getVelocityX()) * Math.sin(45));
 		}
-		
 		// check if ball hits right side of paddle
 		else if (myView.getX() + myView.getFitWidth() / 4 >= myPaddle.getX() + myPaddle.getWidth()) {
 			myVelocity = new Point2D((BOUNCER_SPEED + myPaddle.getVelocityX()) * Math.sin(45),
@@ -121,85 +74,105 @@ public class Bouncer {
 		}
 	}
 
-	/**
-	 * Bounce off the bricks.
-	 */
+	private void calcBounceVelocity(Paddle myPaddle) {
+		double distFromCenter = myView.getX() + myView.getFitWidth() / 2 - (myPaddle.getX() + myPaddle.getWidth() / 2);
+		double normalizedDistFromCenter = distFromCenter / (myPaddle.getWidth() / 2);
+		double bounceAngle = normalizedDistFromCenter * MAX_BOUNCE_ANGLE;
+		double ballVx = BOUNCER_SPEED * Math.sin(Math.toRadians(bounceAngle));
+		double ballVy = BOUNCER_SPEED * Math.cos(Math.toRadians(bounceAngle));
+
+		if (isStartingAtPaddle1())
+			myVelocity = new Point2D(ballVx, -ballVy);
+		else
+			myVelocity = new Point2D(ballVx, ballVy);
+	}
+
 	public void bounceOffBrick(Brick myBrick) {
-		// check if ball hits on top of brick
+		// ball hits top side of brick
 		if (myView.getY() + myView.getFitHeight() <= myBrick.getY() + myBrick.getHeight() / 5) {
 			myVelocity = new Point2D(myVelocity.getX(), -myVelocity.getY());
 		}
-		// check if ball hits on bottom of brick
+		// ball hits bottom side of brick
 		else if (myView.getY() >= myBrick.getY() + myBrick.getHeight() * 4 / 5) {
 			myVelocity = new Point2D(myVelocity.getX(), -myVelocity.getY());
 		}
-		// check if ball hits on left of brick
+		// ball hits left side of brick
 		else if (myView.getX() + myView.getFitWidth() <= myBrick.getX() + myBrick.getWidth() / 5) {
 			myVelocity = new Point2D(-myVelocity.getX(), myVelocity.getY());
 		}
-		// check if ball hits on right of brick
+		// ball hits right side of brick
 		else if (myView.getX() >= myBrick.getX() + myBrick.getWidth() * 4 / 5) {
 			myVelocity = new Point2D(-myVelocity.getX(), myVelocity.getY());
 		}
 	}
 
-	
-	/**
-	 * Recentering - release ball after SPACEBAR entered
-	 * @return
-	 */
-	public void reposition(double x, double y) {
+	public void releaseBall(Paddle myPaddle) {
+		calcBounceVelocity(myPaddle);
+		hasReset = false;
+	}
+
+	public boolean checkIfOutOfBounds() {
+		this.hasReset = myView.getY() > GameEngine.SCREEN_HEIGHT || myView.getY() + myView.getFitHeight() < 0
+				|| myView.getX() + myView.getFitWidth() / 2 > GameEngine.SCREEN_WIDTH
+				|| myView.getX() + myView.getFitWidth() / 2 < 0;
+		return this.hasReset;
+	}
+
+	public void repositionAndStop(double x, double y) {
 		myView.setX(x);
 		myView.setY(y);
-		myVelocity = new Point2D(0,0);
-//		System.out.println(myView.getX() + " , " + myView.getY());
+		stop();
 	}
-	public void releaseBall(Paddle myPaddle) {
-		// if SPACEBAR entered, release ball at certain angle
-		double distFromCenter = myView.getX() + myView.getFitWidth() / 2
-				- (myPaddle.getX() + myPaddle.getWidth() / 2);
-		if (distFromCenter == 0) {
-			if(isInBottomHalf())
-				myVelocity = new Point2D(0,-BOUNCER_SPEED);
-			else
-				myVelocity = new Point2D(0,BOUNCER_SPEED);
-		}
-		else {
-			double normalizedDistFromCenter = distFromCenter / (myPaddle.getWidth() / 2);
-			// calculate angle ball will bounce
-			double bounceAngle = normalizedDistFromCenter * MAX_BOUNCE_ANGLE;
-			double ballVx = BOUNCER_SPEED * Math.sin(Math.toRadians(bounceAngle));
-			double ballVy = BOUNCER_SPEED * Math.cos(Math.toRadians(bounceAngle));
-			
-			if(isInBottomHalf())
-				myVelocity = new Point2D(ballVx, -ballVy);
-			else
-				myVelocity = new Point2D(ballVx, ballVy);
-		
-		}
-		System.out.println("release");
-		restarted = false;
-	}
-	
-	/**
-	 * Miscellaneous methods
-	 */
-	private int getSign(double num) {
-		if (num > 0)
-			return 1;
-		else if (num == 0)
-			return 0;
-		else
-			return -1;
-	}
+
 	public void stop() {
-		myVelocity = new Point2D(0,0);
+		myVelocity = new Point2D(0, 0);
 	}
-	public void restartBall() {
-		restarted = true;
+
+	public void resetBouncer(Paddle myPaddle) {
+		// set the ball to be center with myPaddle1
+		myView.setX(myPaddle.getX() + myPaddle.getWidth() / 2 - myView.getFitWidth() / 2);
+		myView.setY(GameEngine.SCREEN_HEIGHT - myView.getFitHeight() + Paddle.PADDLE1_OFFSET - 1);
+		myView.setFitWidth(BOUNCER_SIZE);
+		myView.setFitHeight(BOUNCER_SIZE);
+		myVelocity = new Point2D(0, 0);
+		hasReset = true;
 	}
-	public boolean isInBottomHalf() { 
-		return myView.getY() > GameEngine.SCREEN_HEIGHT/2;
+
+	public boolean hasReset() {
+		return hasReset;
+	}
+
+	/**
+	 * 
+	 * Update bouncer attributes due to power ups.
+	 * 
+	 */
+	public void expand() {
+		myView.setFitWidth(2 * BOUNCER_SIZE);
+		myView.setFitHeight(2 * BOUNCER_SIZE);
+
+	}
+
+	public void slowSpeed() {
+		myVelocity = new Point2D(myVelocity.getX() * 0.5, myVelocity.getY() * 0.5);
+	}
+
+	public boolean isStartingAtPaddle1() {
+		return myView.getY() > GameEngine.SCREEN_HEIGHT / 2;
+	}
+
+	/**
+	 * 
+	 * Access some attributes of the bouncer.
+	 * 
+	 */
+
+	public double getVelocityX() {
+		return myVelocity.getX();
+	}
+
+	public double getVelocityY() {
+		return myVelocity.getY();
 	}
 
 	/**
@@ -208,4 +181,5 @@ public class Bouncer {
 	public Node getView() {
 		return myView;
 	}
+
 }
