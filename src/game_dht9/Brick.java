@@ -3,6 +3,12 @@ package game_dht9;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
+/**
+ * Brick class used in Breakout Game.
+ * 
+ * @author David Tran (dht9)
+ */
+
 public class Brick extends Rectangle {
 
 	public static final double BRICK_WIDTH = 47.5;
@@ -10,11 +16,12 @@ public class Brick extends Rectangle {
 	public static final int BRICK_GAP = 5;
 	
 	private BrickType brickType;
-
+	
 	enum BrickType {
-		BARRIER(10, Color.GRAY), CREATE_BARRIER(9, Color.WHITE), INFINITE(8, Color.GRAY), LIFE(7, Color.web("#32cd32")), 
-		EXPAND_BOUNCER(6, Color.YELLOW), SLOW_BOUNCER(5, Color.RED),
-		HIGH(3, Color.web("#FF007F")), MEDIUM(2, Color.web("#FF66B2")), LOW(1,Color.web("#FFCCE5")), DESTROYED(0, Color.WHITE);
+		BARRIER(10, Color.GRAY), CREATE_BARRIER(9, Color.WHITE), INFINITE(8, Color.GRAY), LIFE(7,
+				Color.web("#32cd32")), EXPAND_BOUNCER(6, Color.YELLOW), SLOW_BOUNCER(5, Color.RED), HIGH(3,
+						Color.web("#FF007F")), MEDIUM(2,
+								Color.web("#FF66B2")), LOW(1, Color.web("#FFCCE5")), DESTROYED(0, Color.WHITE);
 		private int health;
 		private Color color;
 
@@ -30,32 +37,20 @@ public class Brick extends Rectangle {
 		public int getHealth() {
 			return health;
 		}
-		
-	}
-	
-	public Color getColor() {
-		return brickType.getColor();
-		
-	}
-	
-	public boolean isBrickType(BrickType type) {
-		return type != null && brickType == type;
-	}
 
-	public Brick(double x, double y, int brickNum , int gap) {
-		// set brick location
+	}
+	
+	/**
+	 * 
+	 * Initialize and control Brick attributes.
+	 *
+	 */
+	public Brick(double x, double y, int brickNum, int gap) {
 		this.setX(x * BRICK_WIDTH + gap);
 		this.setY(y * BRICK_HEIGHT);
-
-		// set brick attributes
 		this.setWidth(BRICK_WIDTH - gap);
 		this.setHeight(BRICK_HEIGHT - gap);
-
-		// set brick health
 		this.setBrickType(brickNum);
-//		System.out.println(this.brickType.toString());
-//		 System.out.print(this.brickType.getHealth() + " ");
-		// this.brickType = brickType;
 	}
 
 	public void setBrickType(int brickNum) {
@@ -88,7 +83,6 @@ public class Brick extends Rectangle {
 			this.brickType = BrickType.LOW;
 			break;
 		default:
-			this.brickType = BrickType.DESTROYED;
 			this.destroyBrick();
 			break;
 		}
@@ -97,23 +91,12 @@ public class Brick extends Rectangle {
 	public void decrementType() {
 		switch (this.brickType.health) {
 		case 10:
-			break;
-		case 9:
-			brickType = BrickType.DESTROYED;
-			this.destroyBrick();
-			break;
 		case 8:
 			break;
+		case 9:
 		case 7:
-			brickType = BrickType.DESTROYED;
-			this.destroyBrick();
-			break;
 		case 6:
-			brickType = BrickType.DESTROYED;
-			this.destroyBrick();
-			break;
 		case 5:
-			brickType = BrickType.DESTROYED;
 			this.destroyBrick();
 			break;
 		case 3:
@@ -124,8 +107,6 @@ public class Brick extends Rectangle {
 			break;
 		case 1:
 		default:
-			brickType = BrickType.DESTROYED;
-//			 System.out.println("BRICK DESTROYED");
 			this.destroyBrick();
 			break;
 		}
@@ -137,7 +118,14 @@ public class Brick extends Rectangle {
 		this.setWidth(0);
 		this.setHeight(0);
 		brickType = BrickType.DESTROYED;
-//		System.out.println("BRICK DESTROYED");
 	}
 
+	public boolean isBrickType(BrickType type) {
+		return type != null && brickType == type;
+	}
+
+	public Color getColor() {
+		return brickType.getColor();
+
+	}
 }
