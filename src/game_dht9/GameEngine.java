@@ -25,11 +25,14 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
@@ -59,8 +62,8 @@ public class GameEngine extends Application {
 	public static final int FRAMES_PER_SECOND = 120;
 	public static final int MILLISECOND_DELAY = 1000 / FRAMES_PER_SECOND;
 	public static final double SECOND_DELAY = 1.0 / FRAMES_PER_SECOND;
-//	public static final int KEY_INPUT_SPEED = 10;
-//	public static final double GROWTH_RATE = 1.1;
+	// public static final int KEY_INPUT_SPEED = 10;
+	// public static final double GROWTH_RATE = 1.1;
 
 	private Scene myScene;
 	private Bouncer myBouncer;
@@ -84,24 +87,42 @@ public class GameEngine extends Application {
 	 * start() setupGame(), and step() methods inspired by Duvall at
 	 * https://coursework.cs.duke.edu/CompSci308_2017Fall/lab_bounce/blob/master/src/ExampleBounce.java
 	 */
-	
+
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 		// create one top level collection to organize the things in the scene
 		root = new Group();
-		Scene level1 = setupGame(root, SCREEN_WIDTH, SCREEN_HEIGHT, BACKGROUND, currentLevel);
 		
+		Scene level1 = createLevelScene(root, SCREEN_WIDTH, SCREEN_HEIGHT, BACKGROUND, currentLevel);
+		Scene startMenu = createStartMenu(primaryStage, level1);
+
 		// attach scene to the stage and display it
-		primaryStage.setScene(level1);
+		primaryStage.setScene(startMenu);
 		primaryStage.setTitle(TITLE);
 		primaryStage.show();
+	}
 
-		// attach "game loop" to timeline to play it
-		KeyFrame frame = new KeyFrame(Duration.millis(MILLISECOND_DELAY), e -> step(SECOND_DELAY));
-		Timeline animation = new Timeline();
-		animation.setCycleCount(Timeline.INDEFINITE);
-		animation.getKeyFrames().add(frame);
-		animation.play();
+	public Scene createStartMenu(Stage primaryStage, Scene firstLevel) {
+		Pane start = new Pane();
+		start.setStyle("-fx-background-color: darkslateblue;-fx-padding: 10px;");
+		HBox hbox = new HBox();
+		hbox.setPrefSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+		Button startGameBtn = new Button("START GAME");
+		startGameBtn.setOnAction(new EventHandler<ActionEvent>() {
+			public void handle(ActionEvent t) {
+				primaryStage.setScene(firstLevel);
+				// attach "game loop" to timeline to play it
+				KeyFrame frame = new KeyFrame(Duration.millis(MILLISECOND_DELAY), e -> step(SECOND_DELAY));
+				Timeline animation = new Timeline();
+				animation.setCycleCount(Timeline.INDEFINITE);
+				animation.getKeyFrames().add(frame);
+				animation.play();
+
+			}
+		});
+		hbox.getChildren().add(startGameBtn);
+		start.getChildren().add(hbox);
+		return new Scene(start);
 	}
 
 	private void createPaddleAbilitySequence() {
@@ -115,19 +136,18 @@ public class GameEngine extends Application {
 	private HBox createLabel(String description, Object value) {
 		HBox hbox = new HBox();
 		Label label = new Label(description);
-		label.setFont(new Font("Calibri",20));
+		label.setFont(new Font("Calibri", 20));
 		label.setTextFill(Color.YELLOW);
 		Label val = new Label();
 		if (value != null && value instanceof IntegerProperty) {
 			val = new Label();
-			val.setFont(new Font("Calibri",20));
+			val.setFont(new Font("Calibri", 20));
 			val.setTextFill(Color.YELLOW);
 			val.textProperty().bind(((IntegerProperty) value).asString());
 			hbox.getChildren().addAll(label, val);
-		}
-		else if (value != null && value instanceof StringProperty) {
+		} else if (value != null && value instanceof StringProperty) {
 			val = new Label();
-			val.setFont(new Font("Calibri",20));
+			val.setFont(new Font("Calibri", 20));
 			val.setTextFill(Color.YELLOW);
 			val.textProperty().bind(((StringProperty) value));
 			hbox.getChildren().addAll(label, val);
@@ -135,39 +155,40 @@ public class GameEngine extends Application {
 		return hbox;
 	}
 
-	// Create the game's "scene": what shapes will be in the game and their starting properties
-	private Scene setupGame(Group root, int width, int height, Paint background, int levelNum) {
+	// Create the game's "scene": what shapes will be in the game and their starting
+	// properties
+	private Scene createLevelScene(Group root, int width, int height, Paint background, int levelNum) {
 
 		// create objects and set their properties
 		Image ballImage = new Image(getClass().getClassLoader().getResourceAsStream(BALL_IMAGE));
 		Image paddleImage = new Image(getClass().getClassLoader().getResourceAsStream(PADDLE_IMAGE));
-		
+
 		myBouncer = new Bouncer(ballImage, width, height);
 		myPaddle1 = new Paddle(paddleImage, SCREEN_HEIGHT + Paddle.PADDLE1_OFFSET);
-		myPaddle2 = new Paddle(paddleImage, Paddle.PADDLE2_OFFSET);	
+		myPaddle2 = new Paddle(paddleImage, Paddle.PADDLE2_OFFSET);
 		createPaddleAbilitySequence();
 		team = new Team();
 
 		// load bricks into scene
 		loadBricks(root, levelNum);
-		
+
 		// create labels for the interface
 		BorderPane border = new BorderPane();
 		border.setPrefHeight(SCREEN_HEIGHT - Brick.BRICK_HEIGHT);
-        border.setPrefWidth(SCREEN_WIDTH);
+		border.setPrefWidth(SCREEN_WIDTH);
 		HBox hboxLevel = createLabel("Level: ", level);
 		border.setLeft(hboxLevel);
 		HBox hboxLives = createLabel("Team Lives Remaining: ", teamLives);
 		border.setRight(hboxLives);
 		HBox hboxPaddle = createLabel("Paddle Ability: ", paddleAbility);
 		border.setBottom(hboxPaddle);
-		
+
 		root.getChildren().add(myBouncer.getView());
 		root.getChildren().add(myPaddle1.getView());
 		root.getChildren().add(myPaddle2.getView());
 		root.getChildren().addAll(border);
 		updateHUD();
-		
+
 		// create a place to see the shapes
 		myScene = new Scene(root, width, height, background);
 		myScene.setOnKeyPressed(e -> handleKeyInput(e.getCode()));
@@ -180,10 +201,11 @@ public class GameEngine extends Application {
 	 * Update attributes
 	 */
 	private void step(double elapsedTime) {
-		
+
 		// if ball is not moving, reposition it in the center of paddle1
 		if (myBouncer.getVelocityY() == 0 && myBouncer.hasRestarted()) {
-			myBouncer.reposition(myPaddle1.myView.getX() + myPaddle1.getWidth() / 2 - myBouncer.myView.getFitWidth() / 2,
+			myBouncer.reposition(
+					myPaddle1.myView.getX() + myPaddle1.getWidth() / 2 - myBouncer.myView.getFitWidth() / 2,
 					SCREEN_HEIGHT - myBouncer.myView.getFitHeight() + Paddle.PADDLE1_OFFSET - 1);
 		}
 
@@ -267,14 +289,13 @@ public class GameEngine extends Application {
 					myBouncer.releaseBall(myPaddle2);
 			}
 		} else if (code == KeyCode.B)
-			loadBricks(root,'B');
+			loadBricks(root, 'B');
 		else if (code == KeyCode.N)
 			destroyBarrier();
 		else if (code == KeyCode.L) {
 			team.addLife();
 			updateCurrentLivesDisplayed();
-		}
-		else if (code == KeyCode.SHIFT) {
+		} else if (code == KeyCode.SHIFT) {
 			myPaddle1.doubleExtend();
 			myPaddle2.doubleExtend();
 		} else if (code == KeyCode.DIGIT1)
@@ -304,7 +325,7 @@ public class GameEngine extends Application {
 			destroyAllBricks();
 			resetBallPaddle();
 			decodePaddleAbility(levelNum);
-			currentLevel = levelNum; 
+			currentLevel = levelNum;
 			updateHUD();
 			System.out.println("Welcome to Level: " + levelNum);
 		}
@@ -346,7 +367,7 @@ public class GameEngine extends Application {
 			for (int i = 0; i < rows; i++) {
 				for (int j = 0; j < cols; j++) {
 					board[i][j] = s.nextInt();
-					
+
 					// set bricks in scene, distribute bricks across the screen
 					if (board[i][j] != 0) {
 						myBrick = new Brick(j, i, board[i][j], brickGap);
@@ -397,17 +418,22 @@ public class GameEngine extends Application {
 		int bricksLeft = 0;
 		for (Brick myBrick : myBricks) {
 			if (myBrick.getBoundsInParent().intersects(myBouncer.getView().getBoundsInParent())) {
-				// simulate 1 bounce even if ball hits two bricks in 1 frame
 				bricksHit++;
+				// simulate only 1 bounce even if ball hits 2 bricks
 				if (bricksHit == 1) {
 					myBouncer.bounceOffBrick(myBrick);
+				}
+				// Extra Life Power-Up
+				if (myBrick.isBrickType(BrickType.LIFE)) {
+					team.addLife();
+					updateHUD();
 				}
 				myBrick.decrementType();
 				myBrick.setFill(myBrick.getColor());
 			}
 			// count non-permanent bricks left
-			if ((!myBrick.isType(BrickType.INFINITE)) && !(myBrick.isType(BrickType.DESTROYED))
-					&& !(myBrick.isType(BrickType.BARRIER))) {
+			if ((!myBrick.isBrickType(BrickType.INFINITE)) && !(myBrick.isBrickType(BrickType.DESTROYED))
+					&& !(myBrick.isBrickType(BrickType.BARRIER))) {
 				bricksLeft++;
 			}
 		}
@@ -440,7 +466,7 @@ public class GameEngine extends Application {
 	 */
 	public void destroyBarrier() {
 		for (Brick b : myBricks) {
-			if (b.isType(BrickType.BARRIER))
+			if (b.isBrickType(BrickType.BARRIER))
 				b.destroyBrick();
 		}
 	}
@@ -474,10 +500,18 @@ public class GameEngine extends Application {
 		textFlow.getChildren().addAll(p1Lives);
 		return textFlow;
 	}
-	
-	 public final void updateCurrentLevelDisplayed(){level.set(currentLevel);}
-	 public final void updateCurrentLivesDisplayed(){teamLives.set(team.getLives());}
-	 public final void updateCurrentAbilityDisplayed(){paddleAbility.set(myPaddle1.getCurrType().toString());}
+
+	public final void updateCurrentLevelDisplayed() {
+		level.set(currentLevel);
+	}
+
+	public final void updateCurrentLivesDisplayed() {
+		teamLives.set(team.getLives());
+	}
+
+	public final void updateCurrentAbilityDisplayed() {
+		paddleAbility.set(myPaddle1.getCurrType().toString());
+	}
 
 	/**
 	 * Start the program.

@@ -12,7 +12,7 @@ public class Brick extends Rectangle {
 	private BrickType brickType;
 
 	enum BrickType {
-		BARRIER(10, Color.WHITE), INFINITE(8, Color.GRAY), HIGH(3, Color.web("#FF007F")), MEDIUM(2, Color.web("#FF66B2")), LOW(1,
+		LIFE(11, Color.GREEN), BARRIER(10, Color.WHITE), INFINITE(8, Color.GRAY), HIGH(3, Color.web("#FF007F")), MEDIUM(2, Color.web("#FF66B2")), LOW(1,
 				Color.web("#FFCCE5")), DESTROYED(0, Color.WHITE);
 		private int health;
 		private Color color;
@@ -37,7 +37,7 @@ public class Brick extends Rectangle {
 		
 	}
 	
-	public boolean isType(BrickType type) {
+	public boolean isBrickType(BrickType type) {
 		return type != null && brickType == type;
 	}
 
@@ -59,6 +59,9 @@ public class Brick extends Rectangle {
 
 	public void setBrickType(int brickNum) {
 		switch (brickNum) {
+		case 11:
+			this.brickType = BrickType.LIFE;
+			break;
 		case 10:
 			this.brickType = BrickType.BARRIER;
 			break;
@@ -83,6 +86,10 @@ public class Brick extends Rectangle {
 
 	public void decrementType() {
 		switch (this.brickType.health) {
+		case 11:
+			brickType = BrickType.DESTROYED;
+			this.destroyBrick();
+			break;
 		case 10:
 			break;
 		case 8:
