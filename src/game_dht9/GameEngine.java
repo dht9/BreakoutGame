@@ -158,11 +158,11 @@ public class GameEngine extends Application {
 		BorderPane border = new BorderPane();
 		border.setPrefHeight(SCREEN_HEIGHT - Brick.BRICK_HEIGHT);
 		border.setPrefWidth(SCREEN_WIDTH);
-		HBox hboxLevel = createLabel("Level ", level);
+		HBox hboxLevel = createLabel(" Level ", level);
 		border.setLeft(hboxLevel);
 		HBox hboxLives = createLabel("Team Lives Remaining: ", teamLives);
 		border.setRight(hboxLives);
-		HBox hboxPaddle = createLabel("Paddle Ability: ", paddleAbility);
+		HBox hboxPaddle = createLabel(" Paddle Ability: ", paddleAbility);
 		border.setBottom(hboxPaddle);
 
 		root.getChildren().add(myBouncer.getView());
@@ -388,7 +388,7 @@ public class GameEngine extends Application {
 				break;
 			default:
 				s = new Scanner(new File("YOU_WIN.txt"));
-				brickGap = 0;
+//				brickGap = 0;
 				break;
 			}
 			rows = s.nextInt();
