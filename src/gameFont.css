@@ -1,3 +1,10 @@
+/* NOTE: This CSS code was retrieved from
+ * https://stackoverflow.com/questions/33336542/javafx-custom-fonts
+ *
+ * 
+ */
+
+
 @font-face {
     font-family: 'Fleftex';
     src: url('fonts/Fleftex_M.ttf');
@@ -5,7 +12,7 @@
 
 .label {
     -fx-font-family: 'Fleftex';
-    -fx-font-size: 20;
+    -fx-font-size: 18;
 }
 
 .button .text {
