@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Scanner;
 
 import game_dht9.Brick.BrickType;
-import game_dht9.Paddle.Type;
+import game_dht9.Paddle.PaddleAbility;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
@@ -91,13 +91,10 @@ public class GameEngine extends Application {
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 		// create one top level collection to organize the things in the scene
-		
 		root = new Group();
 		
 		Scene level1 = createLevelScene(root, SCREEN_WIDTH, SCREEN_HEIGHT, BACKGROUND, currentLevel);
 		Scene startMenu = createStartMenu(primaryStage, level1);
-
-//		startMenu.getStylesheets().add(getClass().getResource("/fonts/gameFont.css").toExternalForm());
 
 		// attach scene to the stage and display it
 		primaryStage.setScene(startMenu);
@@ -164,7 +161,9 @@ public class GameEngine extends Application {
 
 		myBouncer = new Bouncer(ballImage, width, height);
 		myPaddle1 = new Paddle(paddleImage, SCREEN_HEIGHT + Paddle.PADDLE1_OFFSET);
+		myPaddle1.setFill(Color.BLUE);
 		myPaddle2 = new Paddle(paddleImage, Paddle.PADDLE2_OFFSET);
+		myPaddle2.setFill(Color.RED);
 		createPaddleAbilitySequence();
 		team = new Team();
 
@@ -175,7 +174,7 @@ public class GameEngine extends Application {
 		BorderPane border = new BorderPane();
 		border.setPrefHeight(SCREEN_HEIGHT - Brick.BRICK_HEIGHT);
 		border.setPrefWidth(SCREEN_WIDTH);
-		HBox hboxLevel = createLabel("Level: ", level);
+		HBox hboxLevel = createLabel("Level ", level);
 		border.setLeft(hboxLevel);
 		HBox hboxLives = createLabel("Team Lives Remaining: ", teamLives);
 		border.setRight(hboxLives);
@@ -183,8 +182,8 @@ public class GameEngine extends Application {
 		border.setBottom(hboxPaddle);
 
 		root.getChildren().add(myBouncer.getView());
-		root.getChildren().add(myPaddle1.getView());
-		root.getChildren().add(myPaddle2.getView());
+		root.getChildren().add(myPaddle1);
+		root.getChildren().add(myPaddle2);
 		root.getChildren().addAll(border);
 		root.getStylesheets().add(getClass().getResource("/gameFont.css").toExternalForm());
 		updateHUD();
@@ -211,7 +210,7 @@ public class GameEngine extends Application {
 
 		// if ball is magnetized by paddle, stick it to paddle
 		else if (myBouncer.getVelocityY() == 0 && !myBouncer.hasRestarted()) {
-			if (myBouncer.isInBottomHalf())
+			if (myBouncer.startingAtPaddle1())
 				myBouncer.reposition(myBouncer.myView.getX() + myPaddle1.getVelocityX() * elapsedTime,
 						myBouncer.myView.getY());
 			else
@@ -226,6 +225,7 @@ public class GameEngine extends Application {
 
 			if (team.livesEqualTo(0)) {
 				loadBricks(root, 1);
+				resetBallPaddle();
 				System.out.println("YOU LOSE");
 				team.resetLives();
 				updateCurrentLivesDisplayed();
@@ -241,7 +241,7 @@ public class GameEngine extends Application {
 		myPaddle2.move(elapsedTime);
 
 		// Edge Warp Paddles if paddle has edge-warp ability
-		if (myPaddle1.isType(Type.EDGEWARP)) {
+		if (myPaddle1.hasAbility(PaddleAbility.EDGEWARP)) {
 			myPaddle1.edgeWarp();
 			myPaddle2.edgeWarp();
 		} else {
@@ -251,10 +251,10 @@ public class GameEngine extends Application {
 	}
 
 	private void checkBallPaddleCollision() {
-		if (myBouncer.getView().getBoundsInParent().intersects(myPaddle1.getView().getBoundsInParent())) {
+		if (myBouncer.getView().getBoundsInParent().intersects(myPaddle1.getBoundsInParent())) {
 
 			// if paddle is not magnetic, bounce ball
-			if (!(myPaddle1.isType(Type.STICKY)))
+			if (!(myPaddle1.hasAbility(PaddleAbility.STICKY)))
 				myBouncer.bounceOffPaddle(myPaddle1, SCREEN_HEIGHT);
 			else {
 				myBouncer.reposition(myBouncer.myView.getX(),
@@ -262,10 +262,10 @@ public class GameEngine extends Application {
 			}
 
 		}
-		if (myBouncer.getView().getBoundsInParent().intersects(myPaddle2.getView().getBoundsInParent())) {
+		if (myBouncer.getView().getBoundsInParent().intersects(myPaddle2.getBoundsInParent())) {
 
 			// if paddle is not magnetic, bounce ball
-			if (!(myPaddle1.isType(Type.STICKY)))
+			if (!(myPaddle1.hasAbility(PaddleAbility.STICKY)))
 				myBouncer.bounceOffPaddle(myPaddle2, SCREEN_HEIGHT);
 			else
 				myBouncer.reposition(myBouncer.myView.getX(),
@@ -283,13 +283,13 @@ public class GameEngine extends Application {
 			myPaddle2.startPaddle2(code);
 		else if (code == KeyCode.SPACE) {
 			if (myBouncer.getVelocityX() == 0 && myBouncer.getVelocityY() == 0) {
-				if (myBouncer.isInBottomHalf())
+				if (myBouncer.startingAtPaddle1())
 					myBouncer.releaseBall(myPaddle1);
 				else
 					myBouncer.releaseBall(myPaddle2);
 			}
 		} else if (code == KeyCode.B)
-			loadBricks(root, 'B');
+			createBarrier();
 		else if (code == KeyCode.N)
 			destroyBarrier();
 		else if (code == KeyCode.L) {
@@ -304,6 +304,10 @@ public class GameEngine extends Application {
 			advanceToNextLevel();
 			// currentLevel++;
 		}
+	}
+
+	private void createBarrier() {
+		loadBricks(root, 'B');
 	}
 
 	/**
@@ -394,14 +398,14 @@ public class GameEngine extends Application {
 		if (levelNum - 1 >= 0 && levelNum - 1 < abilitySequence.size()) {
 			myPaddle1.chooseAbility(abilitySequence.get(levelNum - 1));
 			myPaddle2.chooseAbility(abilitySequence.get(levelNum - 1));
-			System.out.println("Paddle Ability: " + myPaddle1.getCurrType());
+			System.out.println("Paddle Ability: " + myPaddle1.getCurrPaddleAbility());
 		}
 		myPaddle1.enablePaddleAbility();
 		myPaddle2.enablePaddleAbility();
 	}
 
 	public void checkOutOfBounds() {
-		if (myBouncer.outOfBounds()) {
+		if (myBouncer.checkIfOutOfBounds()) {
 			myBouncer.stop();
 			team.decrementLives();
 			updateCurrentLivesDisplayed();
@@ -424,10 +428,8 @@ public class GameEngine extends Application {
 					myBouncer.bounceOffBrick(myBrick);
 				}
 				// Extra Life Power-Up
-				if (myBrick.isBrickType(BrickType.LIFE)) {
-					team.addLife();
-					updateHUD();
-				}
+				checkForPowerUps(myBrick);
+				
 				myBrick.decrementType();
 				myBrick.setFill(myBrick.getColor());
 			}
@@ -449,6 +451,21 @@ public class GameEngine extends Application {
 		}
 	}
 
+	private void checkForPowerUps(Brick myBrick) {
+		if (myBrick.isBrickType(BrickType.LIFE)) {
+			team.addLife();
+			updateHUD();
+		}
+		else if (myBrick.isBrickType(BrickType.EXPAND_BOUNCER))
+			myBouncer.expand();
+		else if (myBrick.isBrickType(BrickType.CREATE_BARRIER))
+			createBarrier();
+		else if (myBrick.isBrickType(BrickType.BARRIER))
+			destroyBarrier();
+		else if (myBrick.isBrickType(BrickType.SLOW_BOUNCER))
+			myBouncer.slowSpeed();
+	}
+
 	/**
 	 * Reset the ball and paddles to starting positions
 	 */
@@ -458,7 +475,7 @@ public class GameEngine extends Application {
 		myBouncer.reposition(
 				myPaddle1.getX() + myPaddle1.getWidth() / 2 - myBouncer.myView.getFitWidth() / 2,
 				SCREEN_HEIGHT - myBouncer.myView.getFitHeight() + Paddle.PADDLE1_OFFSET - 1);
-		myBouncer.restartBall();
+		myBouncer.restartBouncer();
 	}
 
 	/**
@@ -510,7 +527,7 @@ public class GameEngine extends Application {
 	}
 
 	public final void updateCurrentAbilityDisplayed() {
-		paddleAbility.set(myPaddle1.getCurrType().toString());
+		paddleAbility.set(myPaddle1.getCurrPaddleAbility().toString());
 	}
 
 	/**
