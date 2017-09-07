@@ -1,5 +1,11 @@
 package game_dht9;
 
+/**
+ * Team class used in Breakout Game.
+ * 
+ * @author David Tran (dht9)
+ */
+
 public class Team {
 	private int lives;
 	private int score;
@@ -9,14 +15,14 @@ public class Team {
 		score = 0;
 	}
 	
-	public void decrementLives() {
-		lives--;
-		System.out.println("Lost 1 Life");
-	}
-	
 	public void addLife() {
 		lives++;
 		System.out.println("Added 1 Life");
+	}
+	
+	public void decrementLives() {
+		lives--;
+		System.out.println("Lost 1 Life");
 	}
 	
 	public void resetLives() {
