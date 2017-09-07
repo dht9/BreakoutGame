@@ -12,7 +12,7 @@ public class Brick extends Rectangle {
 	private BrickType brickType;
 
 	enum BrickType {
-		LIFE(11, Color.GREEN), BARRIER(10, Color.WHITE), INFINITE(8, Color.GRAY), HIGH(3, Color.web("#FF007F")), MEDIUM(2, Color.web("#FF66B2")), LOW(1,
+		LIFE(11, Color.GREEN), BARRIER(10, Color.GRAY), INFINITE(8, Color.GRAY), HIGH(3, Color.web("#FF007F")), MEDIUM(2, Color.web("#FF66B2")), LOW(1,
 				Color.web("#FFCCE5")), DESTROYED(0, Color.WHITE);
 		private int health;
 		private Color color;

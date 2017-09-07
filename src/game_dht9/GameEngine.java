@@ -84,17 +84,20 @@ public class GameEngine extends Application {
 	/**
 	 * Initialize what will be displayed and how it will be updated.
 	 * 
-	 * start() setupGame(), and step() methods inspired by Duvall at
+	 * start() createLevelScene(), and step() methods inspired by Robert C. Duvall at
 	 * https://coursework.cs.duke.edu/CompSci308_2017Fall/lab_bounce/blob/master/src/ExampleBounce.java
 	 */
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 		// create one top level collection to organize the things in the scene
+		
 		root = new Group();
 		
 		Scene level1 = createLevelScene(root, SCREEN_WIDTH, SCREEN_HEIGHT, BACKGROUND, currentLevel);
 		Scene startMenu = createStartMenu(primaryStage, level1);
+
+//		startMenu.getStylesheets().add(getClass().getResource("/fonts/gameFont.css").toExternalForm());
 
 		// attach scene to the stage and display it
 		primaryStage.setScene(startMenu);
@@ -120,8 +123,10 @@ public class GameEngine extends Application {
 
 			}
 		});
+		startGameBtn.setLayoutX(SCREEN_WIDTH/2);
 		hbox.getChildren().add(startGameBtn);
 		start.getChildren().add(hbox);
+		start.getStylesheets().add(getClass().getResource("/gameFont.css").toExternalForm());
 		return new Scene(start);
 	}
 
@@ -136,22 +141,16 @@ public class GameEngine extends Application {
 	private HBox createLabel(String description, Object value) {
 		HBox hbox = new HBox();
 		Label label = new Label(description);
-		label.setFont(new Font("Calibri", 20));
-		label.setTextFill(Color.YELLOW);
+		label.setTextFill(Color.WHITE);
 		Label val = new Label();
 		if (value != null && value instanceof IntegerProperty) {
-			val = new Label();
-			val.setFont(new Font("Calibri", 20));
-			val.setTextFill(Color.YELLOW);
 			val.textProperty().bind(((IntegerProperty) value).asString());
 			hbox.getChildren().addAll(label, val);
 		} else if (value != null && value instanceof StringProperty) {
-			val = new Label();
-			val.setFont(new Font("Calibri", 20));
-			val.setTextFill(Color.YELLOW);
 			val.textProperty().bind(((StringProperty) value));
 			hbox.getChildren().addAll(label, val);
 		}
+		val.setTextFill(Color.WHITE);
 		return hbox;
 	}
 
@@ -187,6 +186,7 @@ public class GameEngine extends Application {
 		root.getChildren().add(myPaddle1.getView());
 		root.getChildren().add(myPaddle2.getView());
 		root.getChildren().addAll(border);
+		root.getStylesheets().add(getClass().getResource("/gameFont.css").toExternalForm());
 		updateHUD();
 
 		// create a place to see the shapes
