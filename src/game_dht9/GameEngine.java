@@ -205,7 +205,7 @@ public class GameEngine extends Application {
 		// if ball is not moving, reposition it in the center of paddle1
 		if (myBouncer.getVelocityY() == 0 && myBouncer.hasRestarted()) {
 			myBouncer.reposition(
-					myPaddle1.myView.getX() + myPaddle1.getWidth() / 2 - myBouncer.myView.getFitWidth() / 2,
+					myPaddle1.getX() + myPaddle1.getWidth() / 2 - myBouncer.myView.getFitWidth() / 2,
 					SCREEN_HEIGHT - myBouncer.myView.getFitHeight() + Paddle.PADDLE1_OFFSET - 1);
 		}
 
@@ -258,7 +258,7 @@ public class GameEngine extends Application {
 				myBouncer.bounceOffPaddle(myPaddle1, SCREEN_HEIGHT);
 			else {
 				myBouncer.reposition(myBouncer.myView.getX(),
-						myPaddle1.myView.getY() - myBouncer.myView.getFitHeight());
+						myPaddle1.getY() - myBouncer.myView.getFitHeight());
 			}
 
 		}
@@ -269,7 +269,7 @@ public class GameEngine extends Application {
 				myBouncer.bounceOffPaddle(myPaddle2, SCREEN_HEIGHT);
 			else
 				myBouncer.reposition(myBouncer.myView.getX(),
-						myPaddle2.myView.getY() + myPaddle2.myView.getFitHeight());
+						myPaddle2.getY() + myPaddle2.getHeight());
 		}
 	}
 
@@ -456,7 +456,7 @@ public class GameEngine extends Application {
 		myPaddle1.reposition(SCREEN_WIDTH / 2 - myPaddle1.getWidth() / 2);
 		myPaddle2.reposition(SCREEN_WIDTH / 2 - myPaddle2.getWidth() / 2);
 		myBouncer.reposition(
-				myPaddle1.myView.getX() + myPaddle1.myView.getFitWidth() / 2 - myBouncer.myView.getFitWidth() / 2,
+				myPaddle1.getX() + myPaddle1.getWidth() / 2 - myBouncer.myView.getFitWidth() / 2,
 				SCREEN_HEIGHT - myBouncer.myView.getFitHeight() + Paddle.PADDLE1_OFFSET - 1);
 		myBouncer.restartBall();
 	}

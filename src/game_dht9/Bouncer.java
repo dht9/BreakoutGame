@@ -84,11 +84,11 @@ public class Bouncer {
 	 */
 	public void bounceOffPaddle(Paddle myPaddle, double screenHeight) {
 		// check if ball hits top or bottom of paddle
-		if (myView.getY() + myView.getFitHeight() <= myPaddle.myView.getY() + myPaddle.myView.getFitHeight() / 2
-				|| myView.getY() >= myPaddle.myView.getY() + myPaddle.myView.getFitHeight() / 2) {
+		if (myView.getY() + myView.getFitHeight() <= myPaddle.getY() + myPaddle.getHeight() / 2
+				|| myView.getY() >= myPaddle.getY() + myPaddle.getHeight() / 2) {
 			// calculate distance between ball and paddle center
 			double distFromCenter = myView.getX() + myView.getFitWidth() / 2
-					- (myPaddle.myView.getX() + myPaddle.myView.getFitWidth() / 2);
+					- (myPaddle.getX() + myPaddle.getWidth() / 2);
 			if(distFromCenter == 0 && isInBottomHalf()) {
 				myVelocity = new Point2D(0, -BOUNCER_SPEED);
 				return;
@@ -99,7 +99,7 @@ public class Bouncer {
 			}
 			System.out.println(distFromCenter);
 			// normalize the distance [-1,1]
-			double normalizedDistFromCenter = distFromCenter / (myPaddle.myView.getFitWidth() / 2);
+			double normalizedDistFromCenter = distFromCenter / (myPaddle.getWidth() / 2);
 			// calculate angle ball will bounce
 			double bounceAngle = normalizedDistFromCenter * MAX_BOUNCE_ANGLE;
 			double ballVx = BOUNCER_SPEED * Math.sin(Math.toRadians(bounceAngle));
@@ -108,14 +108,14 @@ public class Bouncer {
 		}
 		
 		// check if ball hits left side of paddle
-		else if (myView.getX() + myView.getFitWidth() * 3 / 4 <= myPaddle.myView.getX()) {
+		else if (myView.getX() + myView.getFitWidth() * 3 / 4 <= myPaddle.getX()) {
 			myVelocity = new Point2D((-BOUNCER_SPEED + myPaddle.getVelocityX()) * Math.sin(45),
 					BOUNCER_SPEED * Math.cos(45));
 			System.out.println((-BOUNCER_SPEED + myPaddle.getVelocityX()) * Math.sin(45));
 		}
 		
 		// check if ball hits right side of paddle
-		else if (myView.getX() + myView.getFitWidth() / 4 >= myPaddle.myView.getX() + myPaddle.myView.getFitWidth()) {
+		else if (myView.getX() + myView.getFitWidth() / 4 >= myPaddle.getX() + myPaddle.getWidth()) {
 			myVelocity = new Point2D((BOUNCER_SPEED + myPaddle.getVelocityX()) * Math.sin(45),
 					BOUNCER_SPEED * Math.cos(45));
 		}
@@ -157,7 +157,7 @@ public class Bouncer {
 	public void releaseBall(Paddle myPaddle) {
 		// if SPACEBAR entered, release ball at certain angle
 		double distFromCenter = myView.getX() + myView.getFitWidth() / 2
-				- (myPaddle.myView.getX() + myPaddle.myView.getFitWidth() / 2);
+				- (myPaddle.getX() + myPaddle.getWidth() / 2);
 		if (distFromCenter == 0) {
 			if(isInBottomHalf())
 				myVelocity = new Point2D(0,-BOUNCER_SPEED);
@@ -165,7 +165,7 @@ public class Bouncer {
 				myVelocity = new Point2D(0,BOUNCER_SPEED);
 		}
 		else {
-			double normalizedDistFromCenter = distFromCenter / (myPaddle.myView.getFitWidth() / 2);
+			double normalizedDistFromCenter = distFromCenter / (myPaddle.getWidth() / 2);
 			// calculate angle ball will bounce
 			double bounceAngle = normalizedDistFromCenter * MAX_BOUNCE_ANGLE;
 			double ballVx = BOUNCER_SPEED * Math.sin(Math.toRadians(bounceAngle));

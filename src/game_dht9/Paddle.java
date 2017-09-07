@@ -11,7 +11,7 @@ public class Paddle {
 
 	public static final int PADDLE1_OFFSET = -75;
 	public static final int PADDLE2_OFFSET = 75;
-	public ImageView myView;
+	private ImageView myView;
 	
 	private double PADDLE_HEIGHT = 12;
 	private double PADDLE_WIDTH = 120;
@@ -204,7 +204,13 @@ public class Paddle {
 	}
 	public boolean isType(Type type) {
 		return type != null && type instanceof Type && currentPaddleType == type;
-	} 
+	}
+	public double getX() {
+		return this.myView.getX();
+	}
+	public double getY() {
+		return this.myView.getY();
+	}
 	
 	/**
 	 * Returns internal view of bouncer to interact with other JavaFX methods.
