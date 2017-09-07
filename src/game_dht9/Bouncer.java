@@ -6,7 +6,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
 /**
- * Bouncer class used in Breakout Game
+ * Bouncer class used in Breakout Game.
  * 
  * This class was inspired by:
  * https://coursework.cs.duke.edu/CompSci308_2017Fall/lab_bounce/blob/master/src/Bouncer.java
@@ -16,6 +16,7 @@ import javafx.scene.image.ImageView;
 public class Bouncer {
 
 	public ImageView myView;
+	
 	private Point2D myVelocity;
 	private static final double BOUNCER_SIZE = 18; // 16 for symmetry
 	private static final double MAX_BOUNCE_ANGLE = 60;
@@ -27,13 +28,10 @@ public class Bouncer {
 	 */
 	public Bouncer(Image image, double screenWidth, double screenHeight) {
 		myView = new ImageView(image);
-		// make sure it stays a circle
 		myView.setFitWidth(BOUNCER_SIZE);
 		myView.setFitHeight(BOUNCER_SIZE);
-		// make sure it stays within the bounds
 		myView.setX(-1);
 		myView.setY(-1);
-		// turn speed into velocity that can be updated on bounces
 		myVelocity = new Point2D(0, 0);
 		hasReset = true;
 	}
@@ -48,8 +46,7 @@ public class Bouncer {
 		myView.setY(myView.getY() + myVelocity.getY() * elapsedTime);
 	}
 
-	public void bounce() {
-		// collide all bouncers against the walls
+	public void bounceOffWalls() {
 		if (myView.getX() < 0 || myView.getX() > GameEngine.SCREEN_WIDTH - myView.getBoundsInLocal().getWidth()) {
 			myVelocity = new Point2D(-myVelocity.getX(), myVelocity.getY());
 		}
@@ -121,14 +118,10 @@ public class Bouncer {
 	public void repositionAndStop(double x, double y) {
 		myView.setX(x);
 		myView.setY(y);
-		stop();
-	}
-
-	public void stop() {
 		myVelocity = new Point2D(0, 0);
 	}
 
-	public void resetBouncer(Paddle myPaddle) {
+	public void reset(Paddle myPaddle) {
 		// set the ball to be center with myPaddle1
 		myView.setX(myPaddle.getX() + myPaddle.getWidth() / 2 - myView.getFitWidth() / 2);
 		myView.setY(GameEngine.SCREEN_HEIGHT - myView.getFitHeight() + Paddle.PADDLE1_OFFSET - 1);

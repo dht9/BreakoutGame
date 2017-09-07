@@ -5,16 +5,22 @@ import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.shape.Rectangle;
 
+/**
+ * Paddle class used in Breakout Game.
+ * 
+ * @author David Tran (dht9)
+ */
+
 public class Paddle extends Rectangle {
 
 	public static final int PADDLE1_OFFSET = -75;
 	public static final int PADDLE2_OFFSET = 75;
 
-	private double PADDLE_HEIGHT = 12;
 	private double PADDLE_WIDTH = 120;
-	private Point2D myVelocity;
+	private double PADDLE_HEIGHT = 12;
 	private double PADDLE_SPEED = 250;
 	private int isExtended;
+	private Point2D myVelocity;
 	private PaddleAbility currentPaddleAbility;
 	private PaddleAbility previousPaddleAbility;
 
@@ -26,12 +32,10 @@ public class Paddle extends Rectangle {
 	 * Initialize paddle attributes.
 	 */
 	public Paddle(Image image, double y) {
-		// set paddle attributes
-		setWidth(PADDLE_WIDTH);
-		setHeight(PADDLE_HEIGHT);
-		// set paddle starting position
-		setX(GameEngine.SCREEN_WIDTH / 2 - PADDLE_WIDTH / 2);
-		setY(y);
+		this.setWidth(PADDLE_WIDTH);
+		this.setHeight(PADDLE_HEIGHT);
+		this.setX(GameEngine.SCREEN_WIDTH / 2 - PADDLE_WIDTH / 2);
+		this.setY(y);
 		myVelocity = new Point2D(0, 0);
 		isExtended = 0;
 		currentPaddleAbility = PaddleAbility.PLAIN;
@@ -94,6 +98,11 @@ public class Paddle extends Rectangle {
 
 	public void reposition(double x) {
 		this.setX(x);
+		myVelocity = new Point2D(0, 0);
+	}
+	
+	public void reset() {
+		this.setX(GameEngine.SCREEN_WIDTH/2 - this.getWidth()/2);
 		myVelocity = new Point2D(0, 0);
 	}
 
@@ -180,9 +189,10 @@ public class Paddle extends Rectangle {
 
 	/**
 	 * 
-	 * Access some attributes of the paddle
+	 * Access some attributes of the paddle.
 	 * 
 	 */
+	
 	public double getVelocityX() {
 		return myVelocity.getX();
 	}
