@@ -202,19 +202,19 @@ public class GameEngine extends Application {
 	private void step(double elapsedTime) {
 
 		// if ball is not moving, reposition it in the center of paddle1
-		if (myBouncer.getVelocityY() == 0 && myBouncer.hasRestarted()) {
-			myBouncer.reposition(
+		if (myBouncer.getVelocityY() == 0 && myBouncer.hasReset()) {
+			myBouncer.repositionAndStop(
 					myPaddle1.getX() + myPaddle1.getWidth() / 2 - myBouncer.myView.getFitWidth() / 2,
 					SCREEN_HEIGHT - myBouncer.myView.getFitHeight() + Paddle.PADDLE1_OFFSET - 1);
 		}
 
 		// if ball is magnetized by paddle, stick it to paddle
-		else if (myBouncer.getVelocityY() == 0 && !myBouncer.hasRestarted()) {
-			if (myBouncer.startingAtPaddle1())
-				myBouncer.reposition(myBouncer.myView.getX() + myPaddle1.getVelocityX() * elapsedTime,
+		else if (myBouncer.getVelocityY() == 0 && !myBouncer.hasReset()) {
+			if (myBouncer.isStartingAtPaddle1())
+				myBouncer.repositionAndStop(myBouncer.myView.getX() + myPaddle1.getVelocityX() * elapsedTime,
 						myBouncer.myView.getY());
 			else
-				myBouncer.reposition(myBouncer.myView.getX() + myPaddle2.getVelocityX() * elapsedTime,
+				myBouncer.repositionAndStop(myBouncer.myView.getX() + myPaddle2.getVelocityX() * elapsedTime,
 						myBouncer.myView.getY());
 		}
 
@@ -257,7 +257,7 @@ public class GameEngine extends Application {
 			if (!(myPaddle1.hasAbility(PaddleAbility.STICKY)))
 				myBouncer.bounceOffPaddle(myPaddle1, SCREEN_HEIGHT);
 			else {
-				myBouncer.reposition(myBouncer.myView.getX(),
+				myBouncer.repositionAndStop(myBouncer.myView.getX(),
 						myPaddle1.getY() - myBouncer.myView.getFitHeight());
 			}
 
@@ -268,7 +268,7 @@ public class GameEngine extends Application {
 			if (!(myPaddle1.hasAbility(PaddleAbility.STICKY)))
 				myBouncer.bounceOffPaddle(myPaddle2, SCREEN_HEIGHT);
 			else
-				myBouncer.reposition(myBouncer.myView.getX(),
+				myBouncer.repositionAndStop(myBouncer.myView.getX(),
 						myPaddle2.getY() + myPaddle2.getHeight());
 		}
 	}
@@ -283,7 +283,7 @@ public class GameEngine extends Application {
 			myPaddle2.startPaddle2(code);
 		else if (code == KeyCode.SPACE) {
 			if (myBouncer.getVelocityX() == 0 && myBouncer.getVelocityY() == 0) {
-				if (myBouncer.startingAtPaddle1())
+				if (myBouncer.isStartingAtPaddle1())
 					myBouncer.releaseBall(myPaddle1);
 				else
 					myBouncer.releaseBall(myPaddle2);
@@ -472,10 +472,7 @@ public class GameEngine extends Application {
 	public void resetBallPaddle() {
 		myPaddle1.reposition(SCREEN_WIDTH / 2 - myPaddle1.getWidth() / 2);
 		myPaddle2.reposition(SCREEN_WIDTH / 2 - myPaddle2.getWidth() / 2);
-		myBouncer.reposition(
-				myPaddle1.getX() + myPaddle1.getWidth() / 2 - myBouncer.myView.getFitWidth() / 2,
-				SCREEN_HEIGHT - myBouncer.myView.getFitHeight() + Paddle.PADDLE1_OFFSET - 1);
-		myBouncer.restartBouncer();
+		myBouncer.resetBouncer(myPaddle1); //can introduce putting offset for either paddle 1 or 2
 	}
 
 	/**
