@@ -92,10 +92,28 @@ public class GameEngine extends Application {
 
 	public Scene createStartMenu(Stage primaryStage, Scene firstLevel) {
 		Pane start = new Pane();
+
+//		start.getStylesheets().add(getClass().getResource("/gameFont.css").toExternalForm());
+		StartMenu menu = new StartMenu(start);
+		
+		menu.addLabel("Welcome to 2-Player Breakout!\n\n", 500, 0, Color.WHITE, 26);
+		menu.addLabel("Controls:\n\n", 500, 20, Color.WHITE, 20);
+		menu.addLabel("Move Top Paddle: Left/Right Arrow keys", 500, 20, Color.WHITE, 16);
+		menu.addLabel("Move Bottom Paddle: A/D keys", 500, 20, Color.WHITE, 16);
+		menu.addLabel("Release Ball: [SPACE]\n\n", 500, 20, Color.WHITE, 16);
+		menu.addLabel("Power Ups:\n\n", 500, 0, Color.WHITE, 20);
+		menu.addLabel("Green Brick = +1 Team Life", 500, 0, Color.WHITE, 16);
+		menu.addLabel("Yellow Brick = Bigger Ball", 500, 0, Color.WHITE, 16);
+		menu.addLabel("White Brick = Buffer Barrier", 500, 0, Color.WHITE, 16);
+		menu.addLabel("Red Brick = Slower Ball", 500, 0, Color.WHITE, 16);
+		
+		
+		
 		start.setStyle("-fx-background-color: darkslateblue;-fx-padding: 10px;");
 		HBox hbox = new HBox();
 		hbox.setPrefSize(SCREEN_WIDTH, SCREEN_HEIGHT);
 		Button startGameBtn = new Button("START GAME");
+		startGameBtn.setFont(new Font ("Fleftex",18));
 		startGameBtn.setOnAction(new EventHandler<ActionEvent>() {
 			public void handle(ActionEvent t) {
 				primaryStage.setScene(firstLevel);
@@ -109,11 +127,11 @@ public class GameEngine extends Application {
 			}
 		});
 		hbox.setAlignment(Pos.BOTTOM_CENTER);
-		hbox.getChildren().add(startGameBtn);
+		hbox.getChildren().addAll(startGameBtn);
 
-		start.getChildren().addAll(hbox);
+		start.getChildren().addAll(hbox, menu);
 
-		start.getStylesheets().add(getClass().getResource("/gameFont.css").toExternalForm());
+		
 
 		return new Scene(start);
 	}
@@ -219,16 +237,15 @@ public class GameEngine extends Application {
 			checkBallOutOfBounds();
 			checkBallPaddleCollision();
 			checkBallBrickCollision();
-			
+
 			if (team.livesEqualTo(0)) {
-//				resetBallPaddle();
+				// resetBallPaddle();
 				team.resetLives();
 				loadBricks(root, 1);
 				updateHUD("You Lose! Hit [SPACE]\n To Play Again!");
-//				return;
+				// return;
 			}
 
- 			
 		}
 
 		// update paddle position/speed
@@ -313,7 +330,7 @@ public class GameEngine extends Application {
 			myPaddle1.startPaddle1(code);
 		else if (code == KeyCode.D || code == KeyCode.A)
 			myPaddle2.startPaddle2(code);
-		else if (code == KeyCode.SPACE && currentLevel != NUM_LEVELS+1) {
+		else if (code == KeyCode.SPACE && currentLevel != NUM_LEVELS + 1) {
 			if (myBouncer.getVelocityX() == 0 && myBouncer.getVelocityY() == 0) {
 				if (myBouncer.isStartingAtPaddle1())
 					myBouncer.releaseBall(myPaddle1);
@@ -399,7 +416,7 @@ public class GameEngine extends Application {
 				break;
 			default:
 				s = new Scanner(new File("YOU_WIN.txt"));
-//				team.deleteLives();
+				// team.deleteLives();
 				break;
 			}
 			rows = s.nextInt();
@@ -494,11 +511,6 @@ public class GameEngine extends Application {
 	public final void updatePlayerStatusDisplayed(String str) {
 		youLose.set(str);
 	}
-
-	// public final void createGameOverHUD() {
-	// //ADD
-	// ADD METHOD
-	// }
 
 	/**
 	 * Add text to Scene
