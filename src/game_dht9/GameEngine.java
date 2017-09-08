@@ -97,20 +97,28 @@ public class GameEngine extends Application {
 		StartMenu menu = new StartMenu(start);
 		
 		menu.addLabel("Welcome to 2-Player Breakout!", 500, 0, Color.WHITE, 26);
-		menu.addLabel("Controls:\n\n", 500, 20, Color.WHITE, 20);
-		menu.addLabel("Move Top Paddle: <-/->", 500, 20, Color.WHITE, 16);
-		menu.addLabel("Move Bottom Paddle: [A]/[D]", 500, 20, Color.WHITE, 16);
-		menu.addLabel("Release Ball: [SPACE]", 500, 20, Color.WHITE, 16);
-		menu.addLabel("Power Ups:\n\n", 500, 0, Color.WHITE, 20);
-		menu.addLabel("Green Brick = +1 Team Life", 500, 0, Color.WHITE, 16);
-		menu.addLabel("Yellow Brick = Bigger Ball", 500, 0, Color.WHITE, 16);
-		menu.addLabel("Red Brick = Slower Ball", 500, 0, Color.WHITE, 16);
-		menu.addLabel("White Brick = Activates 1-hit Safety Barrier", 500, 0, Color.WHITE, 16);
-		menu.addLabel("Paddle Abilities:\n\n", 500, 0, Color.WHITE, 20);
-		menu.addLabel("One per level", 500, 0, Color.WHITE, 16);
-		menu.addLabel("Random order", 500, 0, Color.WHITE, 16);
-		menu.addLabel("Extended, Sticky, Edge Warp", 500, 0, Color.WHITE, 16);
-		menu.addLabel("\nGOOD LUCK!", 500, 0, Color.WHITE, 20);
+		menu.addLabel("\nObjective:", 500, 20, Color.WHITE, 18);
+		menu.addLabel("", 500, 0, Color.WHITE, 8);
+		menu.addLabel("Conquer 3 Brick Levels with 3 Team Lives! :", 500, 20, Color.WHITE, 15);
+		menu.addLabel("\nControls:", 500, 20, Color.WHITE, 18);
+		menu.addLabel("", 500, 0, Color.WHITE, 8);
+		menu.addLabel("Move Top Paddle: [A] [D]", 500, 20, Color.WHITE, 15);
+		menu.addLabel("Move Bottom Paddle: <- ->", 500, 20, Color.WHITE, 15);
+		menu.addLabel("Release Ball: [SPACE]", 500, 20, Color.WHITE, 15);
+		menu.addLabel("\nPower Ups:", 500, 0, Color.WHITE, 18);
+		menu.addLabel("", 500, 0, Color.WHITE, 8);
+		menu.addLabel("Green Brick = +1 Team Life", 500, 0, Color.WHITE, 15);
+		menu.addLabel("Yellow Brick = Bigger Ball", 500, 0, Color.WHITE, 15);
+		menu.addLabel("Red Brick = Slower Ball", 500, 0, Color.WHITE, 15);
+		menu.addLabel("White Brick = Activates 1-hit Safety Barrier", 500, 0, Color.WHITE, 15);
+		menu.addLabel("\nPaddle Abilities:", 500, 0, Color.WHITE, 18);
+		menu.addLabel("", 500, 0, Color.WHITE, 8);
+		menu.addLabel("Extended, Sticky, Edge-Warped (one per level, random)", 500, 0, Color.WHITE, 15);
+		menu.addLabel("\nCheat Keys:", 500, 0, Color.WHITE, 18);
+		menu.addLabel("", 500, 0, Color.WHITE, 8);
+		menu.addLabel("Previous Level: [1] , Next Level: [2]", 500, 0, Color.WHITE, 15);
+		menu.addLabel("Toggle Extended Paddle: [SHIFT]", 500, 0, Color.WHITE, 15);
+		menu.addLabel("Activate Barrier [B] , Deactivate Barrier [N]", 500, 0, Color.WHITE, 15);
 		
 		
 		
@@ -119,7 +127,7 @@ public class GameEngine extends Application {
 		HBox hbox = new HBox();
 		hbox.setPrefSize(SCREEN_WIDTH, SCREEN_HEIGHT);
 		Button startGameBtn = new Button("START GAME");
-		startGameBtn.setFont(new Font ("Fleftex",18));
+		startGameBtn.setFont(new Font ("Fleftex",16));
 		startGameBtn.setOnAction(new EventHandler<ActionEvent>() {
 			public void handle(ActionEvent t) {
 				primaryStage.setScene(firstLevel);
