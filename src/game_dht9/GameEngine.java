@@ -16,6 +16,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -27,6 +28,8 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -51,6 +54,7 @@ public class GameEngine extends Application {
 	public static final int FRAMES_PER_SECOND = 120;
 	public static final int MILLISECOND_DELAY = 1000 / FRAMES_PER_SECOND;
 	public static final double SECOND_DELAY = 1.0 / FRAMES_PER_SECOND;
+	public static final int NUM_LEVELS = 3;
 	// public static final int KEY_INPUT_SPEED = 10;
 	// public static final double GROWTH_RATE = 1.1;
 
@@ -64,11 +68,11 @@ public class GameEngine extends Application {
 	private List<Integer> abilitySequence = new ArrayList<>();
 	private Group root;
 	private int currentLevel = 1;
-	private int numLevels = 4;
 
 	private IntegerProperty teamLives = new SimpleIntegerProperty(0);
 	private IntegerProperty level = new SimpleIntegerProperty(0);
 	private StringProperty paddleAbility = new SimpleStringProperty();
+	private StringProperty youLose = new SimpleStringProperty();
 
 	/**
 	 * 
@@ -104,10 +108,13 @@ public class GameEngine extends Application {
 				animation.play();
 			}
 		});
-		startGameBtn.setLayoutX(SCREEN_WIDTH / 2);
+		hbox.setAlignment(Pos.BOTTOM_CENTER);
 		hbox.getChildren().add(startGameBtn);
-		start.getChildren().add(hbox);
+
+		start.getChildren().addAll(hbox);
+
 		start.getStylesheets().add(getClass().getResource("/gameFont.css").toExternalForm());
+
 		return new Scene(start);
 	}
 
@@ -164,13 +171,15 @@ public class GameEngine extends Application {
 		border.setRight(hboxLives);
 		HBox hboxPaddle = createLabel(" Paddle Ability: ", paddleAbility);
 		border.setBottom(hboxPaddle);
+		Label playerStatus = new Label();
+		playerStatus.textProperty().bind(((StringProperty) youLose));
+		playerStatus.setLayoutX(375);
+		playerStatus.setLayoutY(500);
+		playerStatus.setTextFill(Color.WHITE);
 
-		root.getChildren().add(myBouncer.getView());
-		root.getChildren().add(myPaddle1);
-		root.getChildren().add(myPaddle2);
-		root.getChildren().addAll(border);
+		root.getChildren().addAll(myBouncer.getView(), myPaddle1, myPaddle2, border, playerStatus);
 		root.getStylesheets().add(getClass().getResource("/gameFont.css").toExternalForm());
-		updateHUD();
+		updateHUD("");
 
 		// create a place to see the shapes
 		myScene = new Scene(root, width, height, background);
@@ -207,16 +216,19 @@ public class GameEngine extends Application {
 			myBouncer.move(elapsedTime);
 			myBouncer.bounceOffWalls();
 
-			if (team.livesEqualTo(0)) {
-				loadBricks(root, 1);
-				resetBallPaddle();
-				team.resetLives();
-				updateHUD();
-			}
-
 			checkBallOutOfBounds();
 			checkBallPaddleCollision();
 			checkBallBrickCollision();
+			
+			if (team.livesEqualTo(0)) {
+//				resetBallPaddle();
+				team.resetLives();
+				loadBricks(root, 1);
+				updateHUD("You Lose! Hit [SPACE]\n To Play Again!");
+//				return;
+			}
+
+ 			
 		}
 
 		// update paddle position/speed
@@ -248,7 +260,6 @@ public class GameEngine extends Application {
 
 	private void checkBallPaddleCollision() {
 		if (myBouncer.getView().getBoundsInParent().intersects(myPaddle1.getBoundsInParent())) {
-
 			// if paddle is not sticky, bounce ball
 			if (!(myPaddle1.hasAbility(PaddleAbility.STICKY)))
 				myBouncer.bounceOffPaddle(myPaddle1, SCREEN_HEIGHT);
@@ -258,7 +269,6 @@ public class GameEngine extends Application {
 			}
 		}
 		if (myBouncer.getView().getBoundsInParent().intersects(myPaddle2.getBoundsInParent())) {
-
 			// if paddle is not sticky, bounce ball
 			if (!(myPaddle2.hasAbility(PaddleAbility.STICKY)))
 				myBouncer.bounceOffPaddle(myPaddle2, SCREEN_HEIGHT);
@@ -277,6 +287,7 @@ public class GameEngine extends Application {
 				if (bricksHit == 1) {
 					myBouncer.bounceOffBrick(myBrick);
 				}
+				updateHUD("");
 				checkForPowerUps(myBrick);
 				myBrick.decrementType();
 				myBrick.setFill(myBrick.getColor());
@@ -302,13 +313,14 @@ public class GameEngine extends Application {
 			myPaddle1.startPaddle1(code);
 		else if (code == KeyCode.D || code == KeyCode.A)
 			myPaddle2.startPaddle2(code);
-		else if (code == KeyCode.SPACE) {
+		else if (code == KeyCode.SPACE && currentLevel != NUM_LEVELS+1) {
 			if (myBouncer.getVelocityX() == 0 && myBouncer.getVelocityY() == 0) {
 				if (myBouncer.isStartingAtPaddle1())
 					myBouncer.releaseBall(myPaddle1);
 				else
 					myBouncer.releaseBall(myPaddle2);
 			}
+			updateHUD("");
 		} else if (code == KeyCode.B)
 			createBarrier();
 		else if (code == KeyCode.N)
@@ -328,14 +340,13 @@ public class GameEngine extends Application {
 
 	public void recedeToPreviousLevel() {
 		// if not at first level, load previous level
-		if (currentLevel >= 2) {
+		if (currentLevel > 1) {
 			loadBricks(root, currentLevel - 1);
 		}
 	}
 
 	public void advanceToNextLevel() {
-		// if not at last level, load next level
-		if (currentLevel < numLevels) {
+		if (currentLevel <= NUM_LEVELS) {
 			loadBricks(root, currentLevel + 1);
 		}
 	}
@@ -362,15 +373,15 @@ public class GameEngine extends Application {
 			resetBallPaddle();
 			decodePaddleAbility(levelNum);
 			currentLevel = levelNum;
-			updateHUD();
-			System.out.println("Welcome to Level: " + levelNum);
+			updateHUD("");
+			// System.out.println("Welcome to Level: " + levelNum);
 		}
 		readBrickFile(root, levelNum);
 	}
 
 	private void readBrickFile(Group root, int levelNum) {
 		Scanner s;
-		int rows, cols, brickGap = Brick.BRICK_GAP;
+		int rows, cols;
 		try {
 			switch (levelNum) {
 			case 0:
@@ -388,7 +399,7 @@ public class GameEngine extends Application {
 				break;
 			default:
 				s = new Scanner(new File("YOU_WIN.txt"));
-//				brickGap = 0;
+//				team.deleteLives();
 				break;
 			}
 			rows = s.nextInt();
@@ -400,7 +411,7 @@ public class GameEngine extends Application {
 
 					// set bricks in scene, distribute bricks across the screen
 					if (board[i][j] != 0) {
-						myBrick = new Brick(j, i, board[i][j], brickGap);
+						myBrick = new Brick(j, i, board[i][j], Brick.BRICK_GAP);
 						myBricks.add(myBrick);
 						myBrick.setFill(myBrick.getColor());
 						root.getChildren().add(myBrick);
@@ -434,7 +445,7 @@ public class GameEngine extends Application {
 	private void checkForPowerUps(Brick myBrick) {
 		if (myBrick.isBrickType(BrickType.LIFE)) {
 			team.addLife();
-			updateHUD();
+			updateHUD("Extra Life!");
 		} else if (myBrick.isBrickType(BrickType.EXPAND_BOUNCER))
 			myBouncer.expand();
 		else if (myBrick.isBrickType(BrickType.CREATE_BARRIER))
@@ -446,10 +457,10 @@ public class GameEngine extends Application {
 	}
 
 	private void decodePaddleAbility(int levelNum) {
-		if (levelNum - 1 >= 0 && levelNum - 1 < abilitySequence.size()) {
-			myPaddle1.chooseAbility(abilitySequence.get(levelNum - 1));
-			myPaddle2.chooseAbility(abilitySequence.get(levelNum - 1));
-			System.out.println("Paddle Ability: " + myPaddle1.getCurrPaddleAbility());
+		if (levelNum > 0 && levelNum <= abilitySequence.size()) {
+			myPaddle1.setAbility(abilitySequence.get(levelNum - 1));
+			myPaddle2.setAbility(abilitySequence.get(levelNum - 1));
+			System.out.println("Paddle Ability: " + myPaddle1.getCurrentAbility());
 		}
 		myPaddle1.enablePaddleAbility();
 		myPaddle2.enablePaddleAbility();
@@ -461,10 +472,11 @@ public class GameEngine extends Application {
 	 *
 	 */
 
-	private void updateHUD() {
+	private void updateHUD(String str) {
 		updateCurrentAbilityDisplayed();
 		updateCurrentLivesDisplayed();
 		updateCurrentLevelDisplayed();
+		updatePlayerStatusDisplayed(str);
 	}
 
 	public final void updateCurrentLevelDisplayed() {
@@ -476,22 +488,29 @@ public class GameEngine extends Application {
 	}
 
 	public final void updateCurrentAbilityDisplayed() {
-		paddleAbility.set(myPaddle1.getCurrPaddleAbility().toString());
+		paddleAbility.set(myPaddle1.getCurrentAbility().toString());
 	}
+
+	public final void updatePlayerStatusDisplayed(String str) {
+		youLose.set(str);
+	}
+
+	// public final void createGameOverHUD() {
+	// //ADD
+	// ADD METHOD
+	// }
 
 	/**
 	 * Add text to Scene
 	 */
-	// private TextFlow addSceneText() {
-	// TextFlow textFlow = new TextFlow();
-	// textFlow.setLayoutX(5);
-	// textFlow.setLayoutY(0);
-	// Text p1Lives = new Text("Team Lives: ");
-	// p1Lives.setFont(Font.font("Calibri", 20));
-	// p1Lives.setFill(Color.WHITE);
-	// textFlow.getChildren().addAll(p1Lives);
-	// return textFlow;
-	// }
+	public Text addText(String str, double x, double y, Color color) {
+		Text text = new Text(str);
+		text.setX(x);
+		text.setY(y);
+		text.setFill(color);
+		text.setFont(new Font("Fleftex", 16));
+		return text;
+	};
 
 	/**
 	 * Start the program.
