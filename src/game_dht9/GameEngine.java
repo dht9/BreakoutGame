@@ -96,16 +96,22 @@ public class GameEngine extends Application {
 //		start.getStylesheets().add(getClass().getResource("/gameFont.css").toExternalForm());
 		StartMenu menu = new StartMenu(start);
 		
-		menu.addLabel("Welcome to 2-Player Breakout!\n\n", 500, 0, Color.WHITE, 26);
+		menu.addLabel("Welcome to 2-Player Breakout!", 500, 0, Color.WHITE, 26);
 		menu.addLabel("Controls:\n\n", 500, 20, Color.WHITE, 20);
-		menu.addLabel("Move Top Paddle: Left/Right Arrow keys", 500, 20, Color.WHITE, 16);
-		menu.addLabel("Move Bottom Paddle: A/D keys", 500, 20, Color.WHITE, 16);
-		menu.addLabel("Release Ball: [SPACE]\n\n", 500, 20, Color.WHITE, 16);
+		menu.addLabel("Move Top Paddle: <-/->", 500, 20, Color.WHITE, 16);
+		menu.addLabel("Move Bottom Paddle: [A]/[D]", 500, 20, Color.WHITE, 16);
+		menu.addLabel("Release Ball: [SPACE]", 500, 20, Color.WHITE, 16);
 		menu.addLabel("Power Ups:\n\n", 500, 0, Color.WHITE, 20);
 		menu.addLabel("Green Brick = +1 Team Life", 500, 0, Color.WHITE, 16);
 		menu.addLabel("Yellow Brick = Bigger Ball", 500, 0, Color.WHITE, 16);
-		menu.addLabel("White Brick = Buffer Barrier", 500, 0, Color.WHITE, 16);
 		menu.addLabel("Red Brick = Slower Ball", 500, 0, Color.WHITE, 16);
+		menu.addLabel("White Brick = Activates 1-hit Safety Barrier", 500, 0, Color.WHITE, 16);
+		menu.addLabel("Paddle Abilities:\n\n", 500, 0, Color.WHITE, 20);
+		menu.addLabel("One per level", 500, 0, Color.WHITE, 16);
+		menu.addLabel("Random order", 500, 0, Color.WHITE, 16);
+		menu.addLabel("Extended, Sticky, Edge Warp", 500, 0, Color.WHITE, 16);
+		menu.addLabel("\nGOOD LUCK!", 500, 0, Color.WHITE, 20);
+		
 		
 		
 		

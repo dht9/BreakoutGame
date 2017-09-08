@@ -12,7 +12,7 @@ import javafx.scene.text.Text;
 public class StartMenu extends VBox {
 	
 	public StartMenu(Pane start) {
-		setPrefSize(GameEngine.SCREEN_WIDTH, GameEngine.SCREEN_HEIGHT*.75);
+		setPrefSize(GameEngine.SCREEN_WIDTH, GameEngine.SCREEN_HEIGHT*.95);
 		setAlignment(Pos.CENTER);
 	}
 	
