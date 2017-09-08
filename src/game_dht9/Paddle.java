@@ -21,11 +21,11 @@ public class Paddle extends Rectangle {
 	private double PADDLE_SPEED = 250;
 	private int isExtended;
 	private Point2D myVelocity;
-	private PaddleAbility currentPaddleAbility;
-	private PaddleAbility previousPaddleAbility;
+	private PaddleAbility currentAbility;
+	private PaddleAbility previousAbility;
 
 	enum PaddleAbility {
-		EXTENDED, STICKY, EDGEWARP, PLAIN;
+		EXTENDED, STICKY, EDGEWARP, NORMAL;
 	}
 
 	/**
@@ -38,7 +38,7 @@ public class Paddle extends Rectangle {
 		this.setY(y);
 		myVelocity = new Point2D(0, 0);
 		isExtended = 0;
-		currentPaddleAbility = PaddleAbility.PLAIN;
+		currentAbility = PaddleAbility.NORMAL;
 	}
 
 	/**
@@ -65,7 +65,7 @@ public class Paddle extends Rectangle {
 
 	public void move(double elapsedTime) {
 		// if paddle is at edge and is EDGEWARPPED, still enable mobility
-		if (isAtEdge(GameEngine.SCREEN_WIDTH) && currentPaddleAbility == PaddleAbility.EDGEWARP) {
+		if (isAtEdge(GameEngine.SCREEN_WIDTH) && currentAbility == PaddleAbility.EDGEWARP) {
 			this.setX(this.getX() + myVelocity.getX() * elapsedTime);
 		} else {
 			this.setX(this.getX() + myVelocity.getX() * elapsedTime);
@@ -111,38 +111,38 @@ public class Paddle extends Rectangle {
 	 * Initialize and control the paddles' abilities.
 	 *
 	 */
-	public void chooseAbility(int num) {
+	public void setAbility(int num) {
 		switch (num) {
 		case 0:
-			this.previousPaddleAbility = currentPaddleAbility;
-			this.currentPaddleAbility = PaddleAbility.EXTENDED;
+			this.previousAbility = currentAbility;
+			this.currentAbility = PaddleAbility.EXTENDED;
 			break;
 		case 1:
-			this.previousPaddleAbility = currentPaddleAbility;
-			this.currentPaddleAbility = PaddleAbility.STICKY;
+			this.previousAbility = currentAbility;
+			this.currentAbility = PaddleAbility.STICKY;
 			break;
 		case 2:
-			this.previousPaddleAbility = currentPaddleAbility;
-			this.currentPaddleAbility = PaddleAbility.EDGEWARP;
+			this.previousAbility = currentAbility;
+			this.currentAbility = PaddleAbility.EDGEWARP;
 			break;
 		default:
-			this.previousPaddleAbility = currentPaddleAbility;
-			this.currentPaddleAbility = PaddleAbility.PLAIN;
+			this.previousAbility = currentAbility;
+			this.currentAbility = PaddleAbility.NORMAL;
 			break;
 		}
 	}
 
 	public void enablePaddleAbility() {
-		if (this.currentPaddleAbility == PaddleAbility.EXTENDED && this.isExtended == 0) {
+		if (this.currentAbility == PaddleAbility.EXTENDED && this.isExtended == 0) {
 			this.doubleExtend();
-		} else if (this.previousPaddleAbility == PaddleAbility.EXTENDED && this.isExtended == 1) {
+		} else if (this.previousAbility == PaddleAbility.EXTENDED && this.isExtended == 1) {
 			// shrink paddle if extended for next level
 			this.doubleShrink();
 		}
 	}
 
 	public boolean hasAbility(PaddleAbility type) {
-		return type != null && type instanceof PaddleAbility && currentPaddleAbility == type;
+		return type != null && type instanceof PaddleAbility && currentAbility == type;
 	}
 
 	public void edgeWarp() {
@@ -201,7 +201,7 @@ public class Paddle extends Rectangle {
 		return myVelocity.getY();
 	}
 
-	public PaddleAbility getCurrPaddleAbility() {
-		return currentPaddleAbility;
+	public PaddleAbility getCurrentAbility() {
+		return currentAbility;
 	}
 }

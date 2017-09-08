@@ -36,5 +36,9 @@ public class Team {
 	public int getLives() {
 		return lives;
 	}
+	
+	public void deleteLives() {
+		lives = 0;
+	}
 
 }
