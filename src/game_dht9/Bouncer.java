@@ -15,8 +15,7 @@ import javafx.scene.image.ImageView;
  */
 public class Bouncer {
 
-	public ImageView myView;
-	
+	private ImageView myView;
 	private Point2D myVelocity;
 	private static final double BOUNCER_SIZE = 18;
 	private static final double MAX_BOUNCE_ANGLE = 60;
@@ -168,6 +167,22 @@ public class Bouncer {
 
 	public double getVelocityY() {
 		return myVelocity.getY();
+	}
+
+	public double getFitWidth() {
+		return myView.getFitHeight();
+	}
+
+	public double getFitHeight() {
+		return myView.getFitHeight();
+	}
+	
+	public double getX() {
+		return myView.getX();
+	}
+	
+	public double getY() {
+		return myView.getY();
 	}
 
 	/**
