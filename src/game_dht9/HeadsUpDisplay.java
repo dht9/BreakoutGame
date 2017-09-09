@@ -7,12 +7,19 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 
+/**
+ * HeadsUpDisplay (HUD) class used in Breakout Game to add game stats/updates to
+ * the screen during gameplay.
+ * 
+ * @author David Tran (dht9)
+ */
+
 public class HeadsUpDisplay extends BorderPane {
-	
+
 	public HeadsUpDisplay() {
 		this.setPrefSize(GameEngine.SCREEN_WIDTH, GameEngine.SCREEN_HEIGHT - Brick.BRICK_HEIGHT);
 	}
-	
+
 	public void createHUDLabel(String description, Object value, String position) {
 		HBox hbox = new HBox();
 		Label label = new Label(description);
@@ -26,15 +33,15 @@ public class HeadsUpDisplay extends BorderPane {
 			hbox.getChildren().addAll(label, val);
 		}
 		val.setTextFill(Color.WHITE);
-		
+
 		// set position of hbox on borderpane
-		if(position.equalsIgnoreCase("left"))
+		if (position.equalsIgnoreCase("left"))
 			this.setLeft(hbox);
-		else if(position.equalsIgnoreCase("right"))
+		else if (position.equalsIgnoreCase("right"))
 			this.setRight(hbox);
-		else if(position.equalsIgnoreCase("top"))
+		else if (position.equalsIgnoreCase("top"))
 			this.setTop(hbox);
-		else if(position.equalsIgnoreCase("bottom"))
+		else if (position.equalsIgnoreCase("bottom"))
 			this.setBottom(hbox);
 	}
 

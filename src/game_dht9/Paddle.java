@@ -100,9 +100,9 @@ public class Paddle extends Rectangle {
 		this.setX(x);
 		myVelocity = new Point2D(0, 0);
 	}
-	
+
 	public void reset() {
-		this.setX(GameEngine.SCREEN_WIDTH/2 - this.getWidth()/2);
+		this.setX(GameEngine.SCREEN_WIDTH / 2 - this.getWidth() / 2);
 		myVelocity = new Point2D(0, 0);
 	}
 
@@ -192,7 +192,7 @@ public class Paddle extends Rectangle {
 	 * Access some attributes of the paddle.
 	 * 
 	 */
-	
+
 	public double getVelocityX() {
 		return myVelocity.getX();
 	}
