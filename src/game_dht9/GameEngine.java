@@ -24,7 +24,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
@@ -55,9 +54,8 @@ public class GameEngine extends Application {
 	public static final String BALL_IMAGE = "ball.gif";
 	public static final String PADDLE_IMAGE = "paddle.gif";
 	public static final int NUM_LEVELS = 3;
-	public static final int STATUS_LABEL_OFFSETX = SCREEN_WIDTH/2 - 100;
-	public static final int STATUS_LABEL_OFFSETY = SCREEN_HEIGHT/2 + 150;
-	
+	public static final int STATUS_LABEL_OFFSETX = SCREEN_WIDTH / 2 - 100;
+	public static final int STATUS_LABEL_OFFSETY = SCREEN_HEIGHT / 2 + 150;
 
 	private Scene myScene;
 	private Bouncer myBouncer;
@@ -69,7 +67,6 @@ public class GameEngine extends Application {
 	private List<Integer> abilitySequence = new ArrayList<>();
 	private Group root;
 	private int currentLevel = 1;
-
 	private IntegerProperty teamLives = new SimpleIntegerProperty(0);
 	private IntegerProperty level = new SimpleIntegerProperty(0);
 	private StringProperty paddleAbility = new SimpleStringProperty();
@@ -94,8 +91,7 @@ public class GameEngine extends Application {
 	public Scene createStartMenu(Stage primaryStage, Scene firstLevel) {
 		Pane start = new Pane();
 		start.setStyle("-fx-background-color: darkslateblue;-fx-padding: 10px;");
-		// start.getStylesheets().add(getClass().getResource("/gameFont.css").toExternalForm());
-		
+
 		StartMenu menu = new StartMenu(start);
 		addStartMenuText(menu);
 
@@ -162,7 +158,6 @@ public class GameEngine extends Application {
 		// create objects and set their properties
 		Image ballImage = new Image(getClass().getClassLoader().getResourceAsStream(BALL_IMAGE));
 		Image paddleImage = new Image(getClass().getClassLoader().getResourceAsStream(PADDLE_IMAGE));
-
 		myBouncer = new Bouncer(ballImage, width, height);
 		myPaddle1 = new Paddle(paddleImage, SCREEN_HEIGHT + Paddle.PADDLE1_OFFSET);
 		myPaddle1.setFill(Color.BLUE);
@@ -173,23 +168,18 @@ public class GameEngine extends Application {
 
 		loadBricks(root, levelNum);
 
-		// create labels for the HUD
-		BorderPane border = new BorderPane();
-		border.setPrefHeight(SCREEN_HEIGHT - Brick.BRICK_HEIGHT);
-		border.setPrefWidth(SCREEN_WIDTH);
-		HBox hboxLevel = createHUDLabel(" Level ", level);
-		border.setLeft(hboxLevel);
-		HBox hboxLives = createHUDLabel("Team Lives Remaining: ", teamLives);
-		border.setRight(hboxLives);
-		HBox hboxPaddle = createHUDLabel(" Paddle Ability: ", paddleAbility);
-		border.setBottom(hboxPaddle);
+		HeadsUpDisplay hud = new HeadsUpDisplay();
+		hud.createHUDLabel(" Level ", level, "left");
+		hud.createHUDLabel("Team Lives Remaining: ", teamLives, "right");
+		hud.createHUDLabel(" Paddle Ability: ", paddleAbility, "bottom");
+
 		Label statusLabel = new Label();
 		statusLabel.textProperty().bind(((StringProperty) playerStatus));
 		statusLabel.setLayoutX(STATUS_LABEL_OFFSETX);
 		statusLabel.setLayoutY(STATUS_LABEL_OFFSETY);
 		statusLabel.setTextFill(Color.WHITE);
 
-		root.getChildren().addAll(myBouncer.getView(), myPaddle1, myPaddle2, border, statusLabel);
+		root.getChildren().addAll(myBouncer.getView(), myPaddle1, myPaddle2, hud, statusLabel);
 		root.getStylesheets().add(getClass().getResource("/gameFont.css").toExternalForm());
 		updateHUD("");
 
@@ -200,67 +190,42 @@ public class GameEngine extends Application {
 
 		return myScene;
 	}
-	
-	private HBox createHUDLabel(String description, Object value) {
-		HBox hbox = new HBox();
-		Label label = new Label(description);
-		label.setTextFill(Color.WHITE);
-		Label val = new Label();
-		if (value != null && value instanceof IntegerProperty) {
-			val.textProperty().bind(((IntegerProperty) value).asString());
-			hbox.getChildren().addAll(label, val);
-		} else if (value != null && value instanceof StringProperty) {
-			val.textProperty().bind(((StringProperty) value));
-			hbox.getChildren().addAll(label, val);
-		}
-		val.setTextFill(Color.WHITE);
-		return hbox;
-	}
 
 	/**
 	 * Update attributes
 	 */
 	private void step(double elapsedTime) {
 
-		// if ball is not moving, reposition it in the center of paddle1
+		// when ball resets, update position
 		if (myBouncer.getVelocityY() == 0 && myBouncer.hasReset()) {
-			myBouncer.repositionAndStop(
-					myPaddle1.getX() + myPaddle1.getWidth() / 2 - myBouncer.myView.getFitWidth() / 2,
-					SCREEN_HEIGHT - myBouncer.myView.getFitHeight() + Paddle.PADDLE1_OFFSET - 1);
+			stickBallToCenterOfPaddle();
 		}
-
-		// if ball is magnetized by paddle, stick it to paddle
+		// when ball intersects sticky pad, update position
 		else if (myBouncer.getVelocityY() == 0 && !myBouncer.hasReset()) {
-			if (myBouncer.isStartingAtPaddle1())
-				myBouncer.repositionAndStop(myBouncer.myView.getX() + myPaddle1.getVelocityX() * elapsedTime,
-						myBouncer.myView.getY());
-			else
-				myBouncer.repositionAndStop(myBouncer.myView.getX() + myPaddle2.getVelocityX() * elapsedTime,
-						myBouncer.myView.getY());
+			stickBallToPaddle(elapsedTime);
 		}
-
-		// if ball is not magnetized or has not reset, move the ball
+		// when ball is in movement, update position and check conditions
 		else {
 			myBouncer.move(elapsedTime);
 			myBouncer.bounceOffWalls();
-
 			checkBallOutOfBounds();
 			checkBallPaddleCollision();
 			checkBallBrickCollision();
 
 			if (team.livesEqualTo(0)) {
-				// resetBallPaddle();
 				team.resetLives();
 				loadBricks(root, 1);
 				updateHUD("You Lose! Hit [SPACE]\n To Play Again!");
-				// return;
+				;
 			}
-
 		}
-
-		// update paddle position/speed
 		myPaddle1.move(elapsedTime);
 		myPaddle2.move(elapsedTime);
+		checkPaddleOutOfBounds();
+	}
+
+	private void checkPaddleOutOfBounds() {
+		// control edge collision depending on paddle ability
 		if (myPaddle1.hasAbility(PaddleAbility.EDGEWARP)) {
 			myPaddle1.edgeWarp();
 			myPaddle2.edgeWarp();
@@ -268,6 +233,20 @@ public class GameEngine extends Application {
 			myPaddle1.stopPaddleAtEdge();
 			myPaddle2.stopPaddleAtEdge();
 		}
+	}
+
+	private void stickBallToCenterOfPaddle() {
+		myBouncer.repositionAndStop(myPaddle1.getX() + myPaddle1.getWidth() / 2 - myBouncer.myView.getFitWidth() / 2,
+				SCREEN_HEIGHT - myBouncer.myView.getFitHeight() + Paddle.PADDLE1_OFFSET - 1);
+	}
+
+	private void stickBallToPaddle(double elapsedTime) {
+		if (myBouncer.isStartingAtPaddle1())
+			myBouncer.repositionAndStop(myBouncer.myView.getX() + myPaddle1.getVelocityX() * elapsedTime,
+					myBouncer.myView.getY());
+		else
+			myBouncer.repositionAndStop(myBouncer.myView.getX() + myPaddle2.getVelocityX() * elapsedTime,
+					myBouncer.myView.getY());
 	}
 
 	public void checkBallOutOfBounds() {
@@ -282,7 +261,7 @@ public class GameEngine extends Application {
 	public void resetBallPaddle() {
 		myPaddle1.reset();
 		myPaddle2.reset();
-		myBouncer.reset(myPaddle1); // can introduce putting offset for either paddle 1 or 2
+		myBouncer.reset(myPaddle1);
 	}
 
 	private void checkBallPaddleCollision() {
@@ -294,6 +273,7 @@ public class GameEngine extends Application {
 				myBouncer.repositionAndStop(myBouncer.myView.getX(),
 						myPaddle1.getY() - myBouncer.myView.getFitHeight());
 			}
+			// clear power-up activation text once ball hits paddle1
 			updateHUD("");
 		} else if (myBouncer.getView().getBoundsInParent().intersects(myPaddle2.getBoundsInParent())) {
 			// if paddle is not sticky, bounce ball
@@ -301,9 +281,9 @@ public class GameEngine extends Application {
 				myBouncer.bounceOffPaddle(myPaddle2, SCREEN_HEIGHT);
 			else
 				myBouncer.repositionAndStop(myBouncer.myView.getX(), myPaddle2.getY() + myPaddle2.getHeight());
+			// clear any power-up activation text once ball hits paddle1
 			updateHUD("");
 		}
-
 	}
 
 	public void checkBallBrickCollision() {
@@ -348,7 +328,6 @@ public class GameEngine extends Application {
 				else
 					myBouncer.releaseBall(myPaddle2);
 			}
-			updateHUD("");
 		} else if (code == KeyCode.B)
 			createBarrier();
 		else if (code == KeyCode.N)
@@ -367,7 +346,6 @@ public class GameEngine extends Application {
 	}
 
 	public void recedeToPreviousLevel() {
-		// if not at first level, load previous level
 		if (currentLevel > 1) {
 			loadBricks(root, currentLevel - 1);
 		}
@@ -402,7 +380,6 @@ public class GameEngine extends Application {
 			decodePaddleAbility(levelNum);
 			currentLevel = levelNum;
 			updateHUD("");
-			// System.out.println("Welcome to Level: " + levelNum);
 		}
 		readBrickFile(root, levelNum);
 	}
@@ -425,9 +402,9 @@ public class GameEngine extends Application {
 			case 'B':
 				s = new Scanner(new File("Barrier.txt"));
 				break;
+			case 4:
 			default:
 				s = new Scanner(new File("YOU_WIN.txt"));
-				// team.deleteLives();
 				break;
 			}
 			rows = s.nextInt();
@@ -436,8 +413,7 @@ public class GameEngine extends Application {
 			for (int i = 0; i < rows; i++) {
 				for (int j = 0; j < cols; j++) {
 					board[i][j] = s.nextInt();
-
-					// set bricks in scene, distribute bricks across the screen
+					// add bricks to scene
 					if (board[i][j] != 0) {
 						myBrick = new Brick(j, i, board[i][j], Brick.BRICK_GAP);
 						myBricks.add(myBrick);
@@ -500,10 +476,9 @@ public class GameEngine extends Application {
 
 	/**
 	 * 
-	 * Initialize and control game stats
+	 * Initialize and control HUD
 	 *
 	 */
-
 	private void updateHUD(String str) {
 		updateCurrentAbilityDisplayed();
 		updateCurrentLivesDisplayed();
