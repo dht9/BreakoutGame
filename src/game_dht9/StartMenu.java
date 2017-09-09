@@ -15,8 +15,10 @@ import javafx.scene.text.Font;
 
 public class StartMenu extends VBox {
 
+	public static double LENGTH_AVOID_START_BUTTON = 0.95;
+	
 	public StartMenu(Pane start) {
-		setPrefSize(GameEngine.SCREEN_WIDTH, GameEngine.SCREEN_HEIGHT * .95);
+		setPrefSize(GameEngine.SCREEN_WIDTH, GameEngine.SCREEN_HEIGHT * LENGTH_AVOID_START_BUTTON);
 		setAlignment(Pos.CENTER);
 	}
 

@@ -7,11 +7,13 @@ package game_dht9;
  */
 
 public class Team {
+	
+	public static int STARTING_LIVES;
 	private int lives;
 
 	// two players make up a team and share three lives.
 	public Team() {
-		lives = 3;
+		lives = STARTING_LIVES;
 	}
 
 	public void addLife() {
@@ -23,7 +25,7 @@ public class Team {
 	}
 
 	public void resetLives() {
-		lives = 3;
+		lives = STARTING_LIVES;
 	}
 
 	public boolean livesEqualTo(int val) {

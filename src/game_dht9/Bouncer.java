@@ -14,7 +14,13 @@ import javafx.scene.image.ImageView;
  * @author David Tran (dht9)
  */
 public class Bouncer {
-
+	
+	public static final int BOUNCER_HOVER = -1;
+	public static final double TOPLEFTBRICK_COLLISION_BUFFER = 1/5;
+	public static final double BOTRIGHTBRICK_COLLISION_BUFFER = 4/5;
+	public static final double LEFTPADDLE_COLLISION_BUFFER = 3/4;
+	public static final double RIGHTPADDLE_COLLISION_BUFFER = 1/4;
+	
 	private ImageView myView;
 	private Point2D myVelocity;
 	private static final double BOUNCER_SIZE = 18;
@@ -23,6 +29,7 @@ public class Bouncer {
 	private boolean hasReset;
 	private static final double SIZE_SCALAR = 1.75;
 	private static final double SPEED_SCALAR = 0.75;
+	
 
 	/**
 	 * Initialize bouncer attributes.
@@ -60,13 +67,13 @@ public class Bouncer {
 			calcBounceVelocity(myPaddle);
 		}
 		// check if ball hits left side of paddle
-		else if (myView.getX() + myView.getFitWidth() * 3 / 4 <= myPaddle.getX()) {
+		else if (myView.getX() + myView.getFitWidth() * LEFTPADDLE_COLLISION_BUFFER <= myPaddle.getX()) {
 			myVelocity = new Point2D((-BOUNCER_SPEED + myPaddle.getVelocityX()) * Math.sin(45),
 					BOUNCER_SPEED * Math.cos(45));
 			System.out.println((-BOUNCER_SPEED + myPaddle.getVelocityX()) * Math.sin(45));
 		}
 		// check if ball hits right side of paddle
-		else if (myView.getX() + myView.getFitWidth() / 4 >= myPaddle.getX() + myPaddle.getWidth()) {
+		else if (myView.getX() + myView.getFitWidth() * RIGHTPADDLE_COLLISION_BUFFER >= myPaddle.getX() + myPaddle.getWidth()) {
 			myVelocity = new Point2D((BOUNCER_SPEED + myPaddle.getVelocityX()) * Math.sin(45),
 					BOUNCER_SPEED * Math.cos(45));
 		}
@@ -87,19 +94,19 @@ public class Bouncer {
 
 	public void bounceOffBrick(Brick myBrick) {
 		// ball hits top side of brick
-		if (myView.getY() + myView.getFitHeight() <= myBrick.getY() + myBrick.getHeight() / 5) {
+		if (myView.getY() + myView.getFitHeight() <= myBrick.getY() + myBrick.getHeight() * TOPLEFTBRICK_COLLISION_BUFFER) {
 			myVelocity = new Point2D(myVelocity.getX(), -myVelocity.getY());
 		}
 		// ball hits bottom side of brick
-		else if (myView.getY() >= myBrick.getY() + myBrick.getHeight() * 4 / 5) {
+		else if (myView.getY() >= myBrick.getY() + myBrick.getHeight() * BOTRIGHTBRICK_COLLISION_BUFFER) {
 			myVelocity = new Point2D(myVelocity.getX(), -myVelocity.getY());
 		}
 		// ball hits left side of brick
-		else if (myView.getX() + myView.getFitWidth() <= myBrick.getX() + myBrick.getWidth() / 5) {
+		else if (myView.getX() + myView.getFitWidth() <= myBrick.getX() + myBrick.getWidth() * TOPLEFTBRICK_COLLISION_BUFFER) {
 			myVelocity = new Point2D(-myVelocity.getX(), myVelocity.getY());
 		}
 		// ball hits right side of brick
-		else if (myView.getX() >= myBrick.getX() + myBrick.getWidth() * 4 / 5) {
+		else if (myView.getX() >= myBrick.getX() + myBrick.getWidth() * BOTRIGHTBRICK_COLLISION_BUFFER) {
 			myVelocity = new Point2D(-myVelocity.getX(), myVelocity.getY());
 		}
 	}
@@ -125,7 +132,7 @@ public class Bouncer {
 	public void reset(Paddle myPaddle) {
 		// set the ball to be center with myPaddle1
 		myView.setX(myPaddle.getX() + myPaddle.getWidth() / 2 - myView.getFitWidth() / 2);
-		myView.setY(GameEngine.SCREEN_HEIGHT - myView.getFitHeight() + Paddle.PADDLE1_OFFSET - 1);
+		myView.setY(GameEngine.SCREEN_HEIGHT - myView.getFitHeight() + Paddle.PADDLE1_OFFSET + BOUNCER_HOVER);
 		myView.setFitWidth(BOUNCER_SIZE);
 		myView.setFitHeight(BOUNCER_SIZE);
 		myVelocity = new Point2D(0, 0);

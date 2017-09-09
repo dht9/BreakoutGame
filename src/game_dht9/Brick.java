@@ -14,6 +14,7 @@ public class Brick extends Rectangle {
 	public static final double BRICK_WIDTH = 47.5;
 	public static final double BRICK_HEIGHT = 25;
 	public static final int BRICK_GAP = 5;
+	public static final int OUTOFBOUNDS = -1;
 
 	private BrickType brickType;
 
@@ -113,8 +114,8 @@ public class Brick extends Rectangle {
 	}
 
 	public void destroyBrick() {
-		this.setX(-1);
-		this.setY(-1);
+		this.setX(OUTOFBOUNDS);
+		this.setY(OUTOFBOUNDS);
 		this.setWidth(0);
 		this.setHeight(0);
 		brickType = BrickType.DESTROYED;

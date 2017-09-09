@@ -57,6 +57,11 @@ public class GameEngine extends Application {
 	public static final int NUM_LEVELS = 3;
 	public static final int STATUS_LABEL_OFFSETX = SCREEN_WIDTH / 2 - 100;
 	public static final int STATUS_LABEL_OFFSETY = SCREEN_HEIGHT - 150;
+	public static final int LARGE_FONT = 26;
+	public static final int MEDIUM_FONT = 18;
+	public static final int SMALL_FONT = 15;
+	public static final int NEWLINE_FONT = 8;
+	public static final int NUM_ABILITIES = 3;
 
 	private Scene myScene;
 	private Bouncer myBouncer;
@@ -100,7 +105,7 @@ public class GameEngine extends Application {
 		HBox hbox = new HBox();
 		hbox.setPrefSize(SCREEN_WIDTH, SCREEN_HEIGHT);
 		Button startGameBtn = new Button("START GAME");
-		startGameBtn.setFont(new Font("Fleftex", 16));
+		startGameBtn.setFont(new Font("Fleftex", SMALL_FONT));
 		startGameBtn.setOnAction(new EventHandler<ActionEvent>() {
 			public void handle(ActionEvent t) {
 				primaryStage.setScene(firstLevel);
@@ -207,7 +212,7 @@ public class GameEngine extends Application {
 
 	private void stickBallToCenterOfPaddle() {
 		myBouncer.repositionAndStop(myPaddle1.getX() + myPaddle1.getWidth() / 2 - myBouncer.getFitWidth() / 2,
-				SCREEN_HEIGHT - myBouncer.getFitHeight() + Paddle.PADDLE1_OFFSET - 1);
+				SCREEN_HEIGHT - myBouncer.getFitHeight() + Paddle.PADDLE1_OFFSET + Bouncer.BOUNCER_HOVER);
 	}
 
 	private void stickBallToPaddle(double elapsedTime) {
@@ -452,7 +457,7 @@ public class GameEngine extends Application {
 	 * Initialize and Control Paddle Abilities for each level.
 	 */
 	private void createPaddleAbilitySequence() {
-		for (int i = 0; i < 3; i++) {
+		for (int i = 0; i < NUM_ABILITIES; i++) {
 			abilitySequence.add(i);
 		}
 		Collections.shuffle(abilitySequence);
@@ -497,30 +502,30 @@ public class GameEngine extends Application {
 	}
 
 	public void addStartMenuText(StartMenu menu) {
-		menu.addLabel("Welcome to 2-Player Breakout!", Color.WHITE, 26);
-		menu.addLabel("\nObjective:", Color.WHITE, 18);
-		menu.addLabel("", Color.WHITE, 8);
-		menu.addLabel("Conquer 3 Brick Levels with a Friend!", Color.WHITE, 15);
-		menu.addLabel("\nControls:", Color.WHITE, 18);
-		menu.addLabel("", Color.WHITE, 8);
-		menu.addLabel("Move Top Paddle: [A] [D]", Color.WHITE, 15);
-		menu.addLabel("Move Bottom Paddle: <- ->", Color.WHITE, 15);
-		menu.addLabel("Release Ball: [SPACE]", Color.WHITE, 15);
-		menu.addLabel("\nPower Ups:", Color.WHITE, 18);
-		menu.addLabel("", Color.WHITE, 8);
-		menu.addLabel("Green Brick = +1 Team Life", Color.WHITE, 15);
-		menu.addLabel("Yellow Brick = Bigger Ball", Color.WHITE, 15);
-		menu.addLabel("Red Brick = Slower Ball", Color.WHITE, 15);
-		menu.addLabel("Blue Brick = Activates 1-hit Safety Barrier", Color.WHITE, 15);
-		menu.addLabel("\nPaddle Abilities:", Color.WHITE, 18);
-		menu.addLabel("", Color.WHITE, 8);
-		menu.addLabel("Extended, Sticky, Edge-Warped (one per level, random)", Color.WHITE, 15);
-		menu.addLabel("\nCheat Keys:", Color.WHITE, 18);
-		menu.addLabel("", Color.WHITE, 8);
-		menu.addLabel("Previous Level: [1] , Next Level: [2]", Color.WHITE, 15);
-		menu.addLabel("Toggle Extended Paddle: [SHIFT]", Color.WHITE, 15);
-		menu.addLabel("Activate Barrier [B] , Deactivate Barrier [N]", Color.WHITE, 15);
-		menu.addLabel("Add 1 Life [L]", Color.WHITE, 15);
+		menu.addLabel("Welcome to 2-Player Breakout!", Color.WHITE, LARGE_FONT);
+		menu.addLabel("\nObjective:", Color.WHITE, MEDIUM_FONT);
+		menu.addLabel("", Color.WHITE, NEWLINE_FONT);
+		menu.addLabel("Conquer 3 Brick Levels with a Friend!", Color.WHITE, SMALL_FONT);
+		menu.addLabel("\nControls:", Color.WHITE, MEDIUM_FONT);
+		menu.addLabel("", Color.WHITE, NEWLINE_FONT);
+		menu.addLabel("Move Top Paddle: [A] [D]", Color.WHITE, SMALL_FONT);
+		menu.addLabel("Move Bottom Paddle: <- ->", Color.WHITE, SMALL_FONT);
+		menu.addLabel("Release Ball: [SPACE]", Color.WHITE, SMALL_FONT);
+		menu.addLabel("\nPower Ups:", Color.WHITE, MEDIUM_FONT);
+		menu.addLabel("", Color.WHITE, NEWLINE_FONT);
+		menu.addLabel("Green Brick = +1 Team Life", Color.WHITE, SMALL_FONT);
+		menu.addLabel("Yellow Brick = Bigger Ball", Color.WHITE, SMALL_FONT);
+		menu.addLabel("Red Brick = Slower Ball", Color.WHITE, SMALL_FONT);
+		menu.addLabel("Blue Brick = Activates 1-hit Safety Barrier", Color.WHITE, SMALL_FONT);
+		menu.addLabel("\nPaddle Abilities:", Color.WHITE, MEDIUM_FONT);
+		menu.addLabel("", Color.WHITE, NEWLINE_FONT);
+		menu.addLabel("Extended, Sticky, Edge-Warped (one per level, random)", Color.WHITE, SMALL_FONT);
+		menu.addLabel("\nCheat Keys:", Color.WHITE, MEDIUM_FONT);
+		menu.addLabel("", Color.WHITE, NEWLINE_FONT);
+		menu.addLabel("Previous Level: [1] , Next Level: [2]", Color.WHITE, SMALL_FONT);
+		menu.addLabel("Toggle Extended Paddle: [SHIFT]", Color.WHITE, SMALL_FONT);
+		menu.addLabel("Activate Barrier [B] , Deactivate Barrier [N]", Color.WHITE, SMALL_FONT);
+		menu.addLabel("Add 1 Life [L]", Color.WHITE, SMALL_FONT);
 	}
 
 	/**
