@@ -5,6 +5,7 @@ import game_dht9.Paddle.PaddleAbility;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
 
@@ -55,7 +56,7 @@ public class GameEngine extends Application {
 	public static final String PADDLE_IMAGE = "paddle.gif";
 	public static final int NUM_LEVELS = 3;
 	public static final int STATUS_LABEL_OFFSETX = SCREEN_WIDTH / 2 - 100;
-	public static final int STATUS_LABEL_OFFSETY = SCREEN_HEIGHT / 2 + 150;
+	public static final int STATUS_LABEL_OFFSETY = SCREEN_HEIGHT - 150;
 
 	private Scene myScene;
 	private Bouncer myBouncer;
@@ -64,6 +65,7 @@ public class GameEngine extends Application {
 	private Paddle myPaddle2;
 	private Brick myBrick;
 	private List<Brick> myBricks = new ArrayList<>();
+	private Iterator<Brick> iter = myBricks.iterator();
 	private List<Integer> abilitySequence = new ArrayList<>();
 	private Group root;
 	private int currentLevel = 1;
@@ -80,15 +82,15 @@ public class GameEngine extends Application {
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 		root = new Group();
-		Scene level1 = createLevelScene(root, SCREEN_WIDTH, SCREEN_HEIGHT, BACKGROUND, currentLevel);
-		Scene startMenu = createStartMenu(primaryStage, level1);
+		Scene level1 = createGameScene(root, SCREEN_WIDTH, SCREEN_HEIGHT, BACKGROUND, currentLevel);
+		Scene startMenu = createStartScene(primaryStage, level1);
 
 		primaryStage.setScene(startMenu);
 		primaryStage.setTitle(TITLE);
 		primaryStage.show();
 	}
 
-	public Scene createStartMenu(Stage primaryStage, Scene firstLevel) {
+	public Scene createStartScene(Stage primaryStage, Scene firstLevel) {
 		Pane start = new Pane();
 		start.setStyle("-fx-background-color: darkslateblue;-fx-padding: 10px;");
 
@@ -117,43 +119,10 @@ public class GameEngine extends Application {
 		return new Scene(start);
 	}
 
-	private void addStartMenuText(StartMenu menu) {
-		menu.addLabel("Welcome to 2-Player Breakout!", Color.WHITE, 26);
-		menu.addLabel("\nObjective:", Color.WHITE, 18);
-		menu.addLabel("", Color.WHITE, 8);
-		menu.addLabel("Conquer 3 Brick Levels with 3 Team Lives!", Color.WHITE, 15);
-		menu.addLabel("\nControls:", Color.WHITE, 18);
-		menu.addLabel("", Color.WHITE, 8);
-		menu.addLabel("Move Top Paddle: [A] [D]", Color.WHITE, 15);
-		menu.addLabel("Move Bottom Paddle: <- ->", Color.WHITE, 15);
-		menu.addLabel("Release Ball: [SPACE]", Color.WHITE, 15);
-		menu.addLabel("\nPower Ups:", Color.WHITE, 18);
-		menu.addLabel("", Color.WHITE, 8);
-		menu.addLabel("Green Brick = +1 Team Life", Color.WHITE, 15);
-		menu.addLabel("Yellow Brick = Bigger Ball", Color.WHITE, 15);
-		menu.addLabel("Red Brick = Slower Ball", Color.WHITE, 15);
-		menu.addLabel("Blue Brick = Activates 1-hit Safety Barrier", Color.WHITE, 15);
-		menu.addLabel("\nPaddle Abilities:", Color.WHITE, 18);
-		menu.addLabel("", Color.WHITE, 8);
-		menu.addLabel("Extended, Sticky, Edge-Warped (one per level, random)", Color.WHITE, 15);
-		menu.addLabel("\nCheat Keys:", Color.WHITE, 18);
-		menu.addLabel("", Color.WHITE, 8);
-		menu.addLabel("Previous Level: [1] , Next Level: [2]", Color.WHITE, 15);
-		menu.addLabel("Toggle Extended Paddle: [SHIFT]", Color.WHITE, 15);
-		menu.addLabel("Activate Barrier [B] , Deactivate Barrier [N]", Color.WHITE, 15);
-	}
-
-	private void createPaddleAbilitySequence() {
-		for (int i = 0; i < 3; i++) {
-			abilitySequence.add(i);
-		}
-		Collections.shuffle(abilitySequence);
-	}
-
 	/**
 	 * Initialize objects in the scene for Breakout levels
 	 */
-	private Scene createLevelScene(Group root, int width, int height, Paint background, int levelNum) {
+	private Scene createGameScene(Group root, int width, int height, Paint background, int levelNum) {
 
 		// create objects and set their properties
 		Image ballImage = new Image(getClass().getClassLoader().getResourceAsStream(BALL_IMAGE));
@@ -166,24 +135,25 @@ public class GameEngine extends Application {
 		createPaddleAbilitySequence();
 		team = new Team();
 
-		loadBricks(root, levelNum);
-
+		// Set up text interface for brick level
 		HeadsUpDisplay hud = new HeadsUpDisplay();
 		hud.createHUDLabel(" Level ", level, "left");
 		hud.createHUDLabel("Team Lives Remaining: ", teamLives, "right");
 		hud.createHUDLabel(" Paddle Ability: ", paddleAbility, "bottom");
+		updateHUD("");
+		
+		loadBricks(root, levelNum);
 
+		// Set up text for power-up activation or "you lose"
 		Label statusLabel = new Label();
 		statusLabel.textProperty().bind(((StringProperty) playerStatus));
 		statusLabel.setLayoutX(STATUS_LABEL_OFFSETX);
 		statusLabel.setLayoutY(STATUS_LABEL_OFFSETY);
 		statusLabel.setTextFill(Color.WHITE);
 
+		// create a place to see the shapes
 		root.getChildren().addAll(myBouncer.getView(), myPaddle1, myPaddle2, hud, statusLabel);
 		root.getStylesheets().add(getClass().getResource("/gameFont.css").toExternalForm());
-		updateHUD("");
-
-		// create a place to see the shapes
 		myScene = new Scene(root, width, height, background);
 		myScene.setOnKeyPressed(e -> handleKeyInput(e.getCode()));
 		myScene.setOnKeyReleased(e -> handleKeyRelease(e.getCode()));
@@ -192,7 +162,7 @@ public class GameEngine extends Application {
 	}
 
 	/**
-	 * Update attributes
+	 * Update Ball, Paddle, and Brick attributes for each frame.
 	 */
 	private void step(double elapsedTime) {
 
@@ -215,7 +185,7 @@ public class GameEngine extends Application {
 			if (team.livesEqualTo(0)) {
 				team.resetLives();
 				loadBricks(root, 1);
-				updateHUD("You Lose! Hit [SPACE]\n To Play Again!");
+				updateHUD("You Lose! Press\n[SPACE] To Play Again!");
 				;
 			}
 		}
@@ -236,25 +206,26 @@ public class GameEngine extends Application {
 	}
 
 	private void stickBallToCenterOfPaddle() {
-		myBouncer.repositionAndStop(myPaddle1.getX() + myPaddle1.getWidth() / 2 - myBouncer.myView.getFitWidth() / 2,
-				SCREEN_HEIGHT - myBouncer.myView.getFitHeight() + Paddle.PADDLE1_OFFSET - 1);
+		myBouncer.repositionAndStop(myPaddle1.getX() + myPaddle1.getWidth() / 2 - myBouncer.getFitWidth() / 2,
+				SCREEN_HEIGHT - myBouncer.getFitHeight() + Paddle.PADDLE1_OFFSET - 1);
 	}
 
 	private void stickBallToPaddle(double elapsedTime) {
 		if (myBouncer.isStartingAtPaddle1())
-			myBouncer.repositionAndStop(myBouncer.myView.getX() + myPaddle1.getVelocityX() * elapsedTime,
-					myBouncer.myView.getY());
+			myBouncer.repositionAndStop(myBouncer.getX() + myPaddle1.getVelocityX() * elapsedTime,
+					myBouncer.getY());
 		else
-			myBouncer.repositionAndStop(myBouncer.myView.getX() + myPaddle2.getVelocityX() * elapsedTime,
-					myBouncer.myView.getY());
+			myBouncer.repositionAndStop(myBouncer.getX() + myPaddle2.getVelocityX() * elapsedTime,
+					myBouncer.getY());
 	}
 
 	public void checkBallOutOfBounds() {
 		if (myBouncer.checkIfOutOfBounds()) {
 			team.decrementLives();
+			updateHUD("Lost a Life!");
 			updateCurrentLivesDisplayed();
-			System.out.println("TEAM LIVES LEFT: " + team.getLives());
 			resetBallPaddle();
+			// System.out.println("TEAM LIVES LEFT: " + team.getLives());
 		}
 	}
 
@@ -270,18 +241,18 @@ public class GameEngine extends Application {
 			if (!(myPaddle1.hasAbility(PaddleAbility.STICKY)))
 				myBouncer.bounceOffPaddle(myPaddle1, SCREEN_HEIGHT);
 			else {
-				myBouncer.repositionAndStop(myBouncer.myView.getX(),
-						myPaddle1.getY() - myBouncer.myView.getFitHeight());
+				myBouncer.repositionAndStop(myBouncer.getX(),
+						myPaddle1.getY() - myBouncer.getFitHeight());
 			}
-			// clear power-up activation text once ball hits paddle1
+			// clear power-up activation text once ball hits paddle1.
 			updateHUD("");
 		} else if (myBouncer.getView().getBoundsInParent().intersects(myPaddle2.getBoundsInParent())) {
-			// if paddle is not sticky, bounce ball
+			// if paddle is not sticky, bounce ball.
 			if (!(myPaddle2.hasAbility(PaddleAbility.STICKY)))
 				myBouncer.bounceOffPaddle(myPaddle2, SCREEN_HEIGHT);
 			else
-				myBouncer.repositionAndStop(myBouncer.myView.getX(), myPaddle2.getY() + myPaddle2.getHeight());
-			// clear any power-up activation text once ball hits paddle1
+				myBouncer.repositionAndStop(myBouncer.getX(), myPaddle2.getY() + myPaddle2.getHeight());
+			// clear any power-up activation text once ball hits paddle1.
 			updateHUD("");
 		}
 	}
@@ -289,14 +260,26 @@ public class GameEngine extends Application {
 	public void checkBallBrickCollision() {
 		int bricksHit = 0;
 		int bricksLeft = 0;
-		for (Brick myBrick : myBricks) {
+
+		iter = myBricks.iterator();
+
+		while (iter.hasNext()) {
+			Brick myBrick = iter.next();
 			if (myBrick.getBoundsInParent().intersects(myBouncer.getView().getBoundsInParent())) {
 				bricksHit++;
-				// simulate only 1 bounce even if ball hits 2 bricks
+				// simulate only 1 bounce even if ball hits 2 bricks.
 				if (bricksHit == 1) {
 					myBouncer.bounceOffBrick(myBrick);
 				}
-				checkForPowerUps(myBrick);
+				// Check CREATE_BARRIER power up first to avoid throwing
+				// ConcurrentModificationException (i.e. adding to myBricks while iterating.
+				if (myBrick.isBrickType(BrickType.CREATE_BARRIER)) {
+					myBrick.decrementType();
+					createBarrier();
+					updateHUD("1-hit Barrier!");
+					return;
+				}
+				checkForOtherPowerUps(myBrick);
 				myBrick.decrementType();
 				myBrick.setFill(myBrick.getColor());
 			}
@@ -322,11 +305,13 @@ public class GameEngine extends Application {
 		else if (code == KeyCode.D || code == KeyCode.A)
 			myPaddle2.startPaddle2(code);
 		else if (code == KeyCode.SPACE && currentLevel != NUM_LEVELS + 1) {
+			// release the ball from paddle
 			if (myBouncer.getVelocityX() == 0 && myBouncer.getVelocityY() == 0) {
 				if (myBouncer.isStartingAtPaddle1())
 					myBouncer.releaseBall(myPaddle1);
 				else
 					myBouncer.releaseBall(myPaddle2);
+				updateHUD("");
 			}
 		} else if (code == KeyCode.B)
 			createBarrier();
@@ -379,7 +364,8 @@ public class GameEngine extends Application {
 			resetBallPaddle();
 			decodePaddleAbility(levelNum);
 			currentLevel = levelNum;
-			updateHUD("");
+			if (levelNum <= NUM_LEVELS)
+				updateHUD("Level " + levelNum + "!");
 		}
 		readBrickFile(root, levelNum);
 	}
@@ -405,6 +391,7 @@ public class GameEngine extends Application {
 			case 4:
 			default:
 				s = new Scanner(new File("YOU_WIN.txt"));
+				updateHUD("");
 				break;
 			}
 			rows = s.nextInt();
@@ -446,16 +433,13 @@ public class GameEngine extends Application {
 		}
 	}
 
-	private void checkForPowerUps(Brick myBrick) {
+	private void checkForOtherPowerUps(Brick myBrick) {
 		if (myBrick.isBrickType(BrickType.LIFE)) {
 			team.addLife();
 			updateHUD("Extra Life!");
 		} else if (myBrick.isBrickType(BrickType.EXPAND_BOUNCER)) {
 			myBouncer.expand();
 			updateHUD("Big Ball!");
-		} else if (myBrick.isBrickType(BrickType.CREATE_BARRIER)) {
-			createBarrier();
-			updateHUD("1-hit Barrier!");
 		} else if (myBrick.isBrickType(BrickType.BARRIER))
 			destroyBarrier();
 		else if (myBrick.isBrickType(BrickType.SLOW_BOUNCER)) {
@@ -464,11 +448,21 @@ public class GameEngine extends Application {
 		}
 	}
 
+	/**
+	 * Initialize and Control Paddle Abilities for each level.
+	 */
+	private void createPaddleAbilitySequence() {
+		for (int i = 0; i < 3; i++) {
+			abilitySequence.add(i);
+		}
+		Collections.shuffle(abilitySequence);
+	}
+
 	private void decodePaddleAbility(int levelNum) {
 		if (levelNum > 0 && levelNum <= abilitySequence.size()) {
 			myPaddle1.setAbility(abilitySequence.get(levelNum - 1));
 			myPaddle2.setAbility(abilitySequence.get(levelNum - 1));
-			System.out.println("Paddle Ability: " + myPaddle1.getCurrentAbility());
+			// System.out.println("Paddle Ability: " + myPaddle1.getCurrentAbility());
 		}
 		myPaddle1.enablePaddleAbility();
 		myPaddle2.enablePaddleAbility();
@@ -476,7 +470,7 @@ public class GameEngine extends Application {
 
 	/**
 	 * 
-	 * Initialize and control HUD
+	 * Initialize and control HUD & Starting Screen.
 	 *
 	 */
 	private void updateHUD(String str) {
@@ -500,6 +494,33 @@ public class GameEngine extends Application {
 
 	public final void updatePlayerStatusDisplayed(String str) {
 		playerStatus.set(str);
+	}
+
+	public void addStartMenuText(StartMenu menu) {
+		menu.addLabel("Welcome to 2-Player Breakout!", Color.WHITE, 26);
+		menu.addLabel("\nObjective:", Color.WHITE, 18);
+		menu.addLabel("", Color.WHITE, 8);
+		menu.addLabel("Conquer 3 Brick Levels with a Friend!", Color.WHITE, 15);
+		menu.addLabel("\nControls:", Color.WHITE, 18);
+		menu.addLabel("", Color.WHITE, 8);
+		menu.addLabel("Move Top Paddle: [A] [D]", Color.WHITE, 15);
+		menu.addLabel("Move Bottom Paddle: <- ->", Color.WHITE, 15);
+		menu.addLabel("Release Ball: [SPACE]", Color.WHITE, 15);
+		menu.addLabel("\nPower Ups:", Color.WHITE, 18);
+		menu.addLabel("", Color.WHITE, 8);
+		menu.addLabel("Green Brick = +1 Team Life", Color.WHITE, 15);
+		menu.addLabel("Yellow Brick = Bigger Ball", Color.WHITE, 15);
+		menu.addLabel("Red Brick = Slower Ball", Color.WHITE, 15);
+		menu.addLabel("Blue Brick = Activates 1-hit Safety Barrier", Color.WHITE, 15);
+		menu.addLabel("\nPaddle Abilities:", Color.WHITE, 18);
+		menu.addLabel("", Color.WHITE, 8);
+		menu.addLabel("Extended, Sticky, Edge-Warped (one per level, random)", Color.WHITE, 15);
+		menu.addLabel("\nCheat Keys:", Color.WHITE, 18);
+		menu.addLabel("", Color.WHITE, 8);
+		menu.addLabel("Previous Level: [1] , Next Level: [2]", Color.WHITE, 15);
+		menu.addLabel("Toggle Extended Paddle: [SHIFT]", Color.WHITE, 15);
+		menu.addLabel("Activate Barrier [B] , Deactivate Barrier [N]", Color.WHITE, 15);
+		menu.addLabel("Add 1 Life [L]", Color.WHITE, 15);
 	}
 
 	/**
