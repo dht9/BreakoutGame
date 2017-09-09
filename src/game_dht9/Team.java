@@ -7,7 +7,7 @@ package game_dht9;
  */
 
 public class Team {
-	
+
 	public static int STARTING_LIVES = 3;
 	private int lives;
 
