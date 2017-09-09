@@ -17,11 +17,8 @@ public class StartMenu extends VBox {
 	}
 	
 	
-	public void addLabel(String str, double x, double y, Color color, int size) {
+	public void addLabel(String str, Color color, int size) {
 		Label label = new Label(str);
-		label.setLayoutX(x);
-//		label.setLayoutY(y);
-//		label.setAlignment(Pos.BOTTOM_LEFT);
 		label.setTextFill(color);
 		label.setFont(new Font("Fleftex", size));
 		this.getChildren().add(label);

@@ -18,10 +18,12 @@ public class Bouncer {
 	public ImageView myView;
 	
 	private Point2D myVelocity;
-	private static final double BOUNCER_SIZE = 18; // 16 for symmetry
+	private static final double BOUNCER_SIZE = 18;
 	private static final double MAX_BOUNCE_ANGLE = 60;
-	private static final double BOUNCER_SPEED = 250;
+	private static final double BOUNCER_SPEED = 275;
 	private boolean hasReset;
+	private static final double SIZE_SCALAR = 1.75;
+	private static final double SPEED_SCALAR = 0.75;
 
 	/**
 	 * Initialize bouncer attributes.
@@ -141,13 +143,13 @@ public class Bouncer {
 	 * 
 	 */
 	public void expand() {
-		myView.setFitWidth(2 * BOUNCER_SIZE);
-		myView.setFitHeight(2 * BOUNCER_SIZE);
+		myView.setFitWidth(SIZE_SCALAR * BOUNCER_SIZE);
+		myView.setFitHeight(SIZE_SCALAR * BOUNCER_SIZE);
 
 	}
 
 	public void slowSpeed() {
-		myVelocity = new Point2D(myVelocity.getX() * 0.5, myVelocity.getY() * 0.5);
+		myVelocity = new Point2D(myVelocity.getX() * SPEED_SCALAR, myVelocity.getY() * SPEED_SCALAR);
 	}
 
 	public boolean isStartingAtPaddle1() {

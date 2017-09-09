@@ -18,7 +18,7 @@ public class Brick extends Rectangle {
 	private BrickType brickType;
 	
 	enum BrickType {
-		BARRIER(10, Color.GRAY), CREATE_BARRIER(9, Color.WHITE), INFINITE(8, Color.GRAY), LIFE(7,
+		BARRIER(10, Color.WHITE), CREATE_BARRIER(9, Color.BLUE), INFINITE(8, Color.GRAY), LIFE(7,
 				Color.web("#32cd32")), EXPAND_BOUNCER(6, Color.YELLOW), SLOW_BOUNCER(5, Color.RED), HIGH(3,
 						Color.web("#FF007F")), MEDIUM(2,
 								Color.web("#FF66B2")), LOW(1, Color.web("#FFCCE5")), DESTROYED(0, Color.WHITE);

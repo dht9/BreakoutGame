@@ -1,12 +1,13 @@
 package game_dht9;
 
+import game_dht9.Brick.BrickType;
+import game_dht9.Paddle.PaddleAbility;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
 
-import game_dht9.Brick.BrickType;
-import game_dht9.Paddle.PaddleAbility;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
@@ -29,7 +30,6 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
-import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -37,7 +37,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 
 /**
- * Game Engine for Breakout Game.
+ * Game Engine for Breakout Game for Fall 2017, Computer Science 308.
  * 
  * start() createLevelScene(), and step() methods inspired by Robert Duvall at
  * https://coursework.cs.duke.edu/CompSci308_2017Fall/lab_bounce/blob/master/src/ExampleBounce.java
@@ -46,17 +46,18 @@ import java.io.FileNotFoundException;
  */
 public class GameEngine extends Application {
 	public static final String TITLE = "JavaFX: Breakout Game";
-	public static final String BALL_IMAGE = "ball.gif";
-	public static final String PADDLE_IMAGE = "paddle.gif";
 	public static final int SCREEN_WIDTH = 1004;
 	public static final int SCREEN_HEIGHT = 700;
 	public static final Paint BACKGROUND = Color.BLACK;
 	public static final int FRAMES_PER_SECOND = 120;
 	public static final int MILLISECOND_DELAY = 1000 / FRAMES_PER_SECOND;
 	public static final double SECOND_DELAY = 1.0 / FRAMES_PER_SECOND;
+	public static final String BALL_IMAGE = "ball.gif";
+	public static final String PADDLE_IMAGE = "paddle.gif";
 	public static final int NUM_LEVELS = 3;
-	// public static final int KEY_INPUT_SPEED = 10;
-	// public static final double GROWTH_RATE = 1.1;
+	public static final int STATUS_LABEL_OFFSETX = SCREEN_WIDTH/2 - 100;
+	public static final int STATUS_LABEL_OFFSETY = SCREEN_HEIGHT/2 + 150;
+	
 
 	private Scene myScene;
 	private Bouncer myBouncer;
@@ -72,7 +73,7 @@ public class GameEngine extends Application {
 	private IntegerProperty teamLives = new SimpleIntegerProperty(0);
 	private IntegerProperty level = new SimpleIntegerProperty(0);
 	private StringProperty paddleAbility = new SimpleStringProperty();
-	private StringProperty youLose = new SimpleStringProperty();
+	private StringProperty playerStatus = new SimpleStringProperty();
 
 	/**
 	 * 
@@ -92,46 +93,19 @@ public class GameEngine extends Application {
 
 	public Scene createStartMenu(Stage primaryStage, Scene firstLevel) {
 		Pane start = new Pane();
-
-//		start.getStylesheets().add(getClass().getResource("/gameFont.css").toExternalForm());
-		StartMenu menu = new StartMenu(start);
-		
-		menu.addLabel("Welcome to 2-Player Breakout!", 500, 0, Color.WHITE, 26);
-		menu.addLabel("\nObjective:", 500, 20, Color.WHITE, 18);
-		menu.addLabel("", 500, 0, Color.WHITE, 8);
-		menu.addLabel("Conquer 3 Brick Levels with 3 Team Lives! :", 500, 20, Color.WHITE, 15);
-		menu.addLabel("\nControls:", 500, 20, Color.WHITE, 18);
-		menu.addLabel("", 500, 0, Color.WHITE, 8);
-		menu.addLabel("Move Top Paddle: [A] [D]", 500, 20, Color.WHITE, 15);
-		menu.addLabel("Move Bottom Paddle: <- ->", 500, 20, Color.WHITE, 15);
-		menu.addLabel("Release Ball: [SPACE]", 500, 20, Color.WHITE, 15);
-		menu.addLabel("\nPower Ups:", 500, 0, Color.WHITE, 18);
-		menu.addLabel("", 500, 0, Color.WHITE, 8);
-		menu.addLabel("Green Brick = +1 Team Life", 500, 0, Color.WHITE, 15);
-		menu.addLabel("Yellow Brick = Bigger Ball", 500, 0, Color.WHITE, 15);
-		menu.addLabel("Red Brick = Slower Ball", 500, 0, Color.WHITE, 15);
-		menu.addLabel("White Brick = Activates 1-hit Safety Barrier", 500, 0, Color.WHITE, 15);
-		menu.addLabel("\nPaddle Abilities:", 500, 0, Color.WHITE, 18);
-		menu.addLabel("", 500, 0, Color.WHITE, 8);
-		menu.addLabel("Extended, Sticky, Edge-Warped (one per level, random)", 500, 0, Color.WHITE, 15);
-		menu.addLabel("\nCheat Keys:", 500, 0, Color.WHITE, 18);
-		menu.addLabel("", 500, 0, Color.WHITE, 8);
-		menu.addLabel("Previous Level: [1] , Next Level: [2]", 500, 0, Color.WHITE, 15);
-		menu.addLabel("Toggle Extended Paddle: [SHIFT]", 500, 0, Color.WHITE, 15);
-		menu.addLabel("Activate Barrier [B] , Deactivate Barrier [N]", 500, 0, Color.WHITE, 15);
-		
-		
-		
-		
 		start.setStyle("-fx-background-color: darkslateblue;-fx-padding: 10px;");
+		// start.getStylesheets().add(getClass().getResource("/gameFont.css").toExternalForm());
+		
+		StartMenu menu = new StartMenu(start);
+		addStartMenuText(menu);
+
 		HBox hbox = new HBox();
 		hbox.setPrefSize(SCREEN_WIDTH, SCREEN_HEIGHT);
 		Button startGameBtn = new Button("START GAME");
-		startGameBtn.setFont(new Font ("Fleftex",16));
+		startGameBtn.setFont(new Font("Fleftex", 16));
 		startGameBtn.setOnAction(new EventHandler<ActionEvent>() {
 			public void handle(ActionEvent t) {
 				primaryStage.setScene(firstLevel);
-
 				// attach "game loop" to timeline to play it
 				KeyFrame frame = new KeyFrame(Duration.millis(MILLISECOND_DELAY), e -> step(SECOND_DELAY));
 				Timeline animation = new Timeline();
@@ -142,12 +116,35 @@ public class GameEngine extends Application {
 		});
 		hbox.setAlignment(Pos.BOTTOM_CENTER);
 		hbox.getChildren().addAll(startGameBtn);
-
 		start.getChildren().addAll(hbox, menu);
 
-		
-
 		return new Scene(start);
+	}
+
+	private void addStartMenuText(StartMenu menu) {
+		menu.addLabel("Welcome to 2-Player Breakout!", Color.WHITE, 26);
+		menu.addLabel("\nObjective:", Color.WHITE, 18);
+		menu.addLabel("", Color.WHITE, 8);
+		menu.addLabel("Conquer 3 Brick Levels with 3 Team Lives!", Color.WHITE, 15);
+		menu.addLabel("\nControls:", Color.WHITE, 18);
+		menu.addLabel("", Color.WHITE, 8);
+		menu.addLabel("Move Top Paddle: [A] [D]", Color.WHITE, 15);
+		menu.addLabel("Move Bottom Paddle: <- ->", Color.WHITE, 15);
+		menu.addLabel("Release Ball: [SPACE]", Color.WHITE, 15);
+		menu.addLabel("\nPower Ups:", Color.WHITE, 18);
+		menu.addLabel("", Color.WHITE, 8);
+		menu.addLabel("Green Brick = +1 Team Life", Color.WHITE, 15);
+		menu.addLabel("Yellow Brick = Bigger Ball", Color.WHITE, 15);
+		menu.addLabel("Red Brick = Slower Ball", Color.WHITE, 15);
+		menu.addLabel("Blue Brick = Activates 1-hit Safety Barrier", Color.WHITE, 15);
+		menu.addLabel("\nPaddle Abilities:", Color.WHITE, 18);
+		menu.addLabel("", Color.WHITE, 8);
+		menu.addLabel("Extended, Sticky, Edge-Warped (one per level, random)", Color.WHITE, 15);
+		menu.addLabel("\nCheat Keys:", Color.WHITE, 18);
+		menu.addLabel("", Color.WHITE, 8);
+		menu.addLabel("Previous Level: [1] , Next Level: [2]", Color.WHITE, 15);
+		menu.addLabel("Toggle Extended Paddle: [SHIFT]", Color.WHITE, 15);
+		menu.addLabel("Activate Barrier [B] , Deactivate Barrier [N]", Color.WHITE, 15);
 	}
 
 	private void createPaddleAbilitySequence() {
@@ -155,22 +152,6 @@ public class GameEngine extends Application {
 			abilitySequence.add(i);
 		}
 		Collections.shuffle(abilitySequence);
-	}
-
-	private HBox createLabel(String description, Object value) {
-		HBox hbox = new HBox();
-		Label label = new Label(description);
-		label.setTextFill(Color.WHITE);
-		Label val = new Label();
-		if (value != null && value instanceof IntegerProperty) {
-			val.textProperty().bind(((IntegerProperty) value).asString());
-			hbox.getChildren().addAll(label, val);
-		} else if (value != null && value instanceof StringProperty) {
-			val.textProperty().bind(((StringProperty) value));
-			hbox.getChildren().addAll(label, val);
-		}
-		val.setTextFill(Color.WHITE);
-		return hbox;
 	}
 
 	/**
@@ -190,26 +171,25 @@ public class GameEngine extends Application {
 		createPaddleAbilitySequence();
 		team = new Team();
 
-		// load bricks into scene
 		loadBricks(root, levelNum);
 
-		// create labels for the interface
+		// create labels for the HUD
 		BorderPane border = new BorderPane();
 		border.setPrefHeight(SCREEN_HEIGHT - Brick.BRICK_HEIGHT);
 		border.setPrefWidth(SCREEN_WIDTH);
-		HBox hboxLevel = createLabel(" Level ", level);
+		HBox hboxLevel = createHUDLabel(" Level ", level);
 		border.setLeft(hboxLevel);
-		HBox hboxLives = createLabel("Team Lives Remaining: ", teamLives);
+		HBox hboxLives = createHUDLabel("Team Lives Remaining: ", teamLives);
 		border.setRight(hboxLives);
-		HBox hboxPaddle = createLabel(" Paddle Ability: ", paddleAbility);
+		HBox hboxPaddle = createHUDLabel(" Paddle Ability: ", paddleAbility);
 		border.setBottom(hboxPaddle);
-		Label playerStatus = new Label();
-		playerStatus.textProperty().bind(((StringProperty) youLose));
-		playerStatus.setLayoutX(375);
-		playerStatus.setLayoutY(500);
-		playerStatus.setTextFill(Color.WHITE);
+		Label statusLabel = new Label();
+		statusLabel.textProperty().bind(((StringProperty) playerStatus));
+		statusLabel.setLayoutX(STATUS_LABEL_OFFSETX);
+		statusLabel.setLayoutY(STATUS_LABEL_OFFSETY);
+		statusLabel.setTextFill(Color.WHITE);
 
-		root.getChildren().addAll(myBouncer.getView(), myPaddle1, myPaddle2, border, playerStatus);
+		root.getChildren().addAll(myBouncer.getView(), myPaddle1, myPaddle2, border, statusLabel);
 		root.getStylesheets().add(getClass().getResource("/gameFont.css").toExternalForm());
 		updateHUD("");
 
@@ -219,6 +199,22 @@ public class GameEngine extends Application {
 		myScene.setOnKeyReleased(e -> handleKeyRelease(e.getCode()));
 
 		return myScene;
+	}
+	
+	private HBox createHUDLabel(String description, Object value) {
+		HBox hbox = new HBox();
+		Label label = new Label(description);
+		label.setTextFill(Color.WHITE);
+		Label val = new Label();
+		if (value != null && value instanceof IntegerProperty) {
+			val.textProperty().bind(((IntegerProperty) value).asString());
+			hbox.getChildren().addAll(label, val);
+		} else if (value != null && value instanceof StringProperty) {
+			val.textProperty().bind(((StringProperty) value));
+			hbox.getChildren().addAll(label, val);
+		}
+		val.setTextFill(Color.WHITE);
+		return hbox;
 	}
 
 	/**
@@ -298,14 +294,16 @@ public class GameEngine extends Application {
 				myBouncer.repositionAndStop(myBouncer.myView.getX(),
 						myPaddle1.getY() - myBouncer.myView.getFitHeight());
 			}
-		}
-		if (myBouncer.getView().getBoundsInParent().intersects(myPaddle2.getBoundsInParent())) {
+			updateHUD("");
+		} else if (myBouncer.getView().getBoundsInParent().intersects(myPaddle2.getBoundsInParent())) {
 			// if paddle is not sticky, bounce ball
 			if (!(myPaddle2.hasAbility(PaddleAbility.STICKY)))
 				myBouncer.bounceOffPaddle(myPaddle2, SCREEN_HEIGHT);
 			else
 				myBouncer.repositionAndStop(myBouncer.myView.getX(), myPaddle2.getY() + myPaddle2.getHeight());
+			updateHUD("");
 		}
+
 	}
 
 	public void checkBallBrickCollision() {
@@ -318,7 +316,6 @@ public class GameEngine extends Application {
 				if (bricksHit == 1) {
 					myBouncer.bounceOffBrick(myBrick);
 				}
-				updateHUD("");
 				checkForPowerUps(myBrick);
 				myBrick.decrementType();
 				myBrick.setFill(myBrick.getColor());
@@ -477,14 +474,18 @@ public class GameEngine extends Application {
 		if (myBrick.isBrickType(BrickType.LIFE)) {
 			team.addLife();
 			updateHUD("Extra Life!");
-		} else if (myBrick.isBrickType(BrickType.EXPAND_BOUNCER))
+		} else if (myBrick.isBrickType(BrickType.EXPAND_BOUNCER)) {
 			myBouncer.expand();
-		else if (myBrick.isBrickType(BrickType.CREATE_BARRIER))
+			updateHUD("Big Ball!");
+		} else if (myBrick.isBrickType(BrickType.CREATE_BARRIER)) {
 			createBarrier();
-		else if (myBrick.isBrickType(BrickType.BARRIER))
+			updateHUD("1-hit Barrier!");
+		} else if (myBrick.isBrickType(BrickType.BARRIER))
 			destroyBarrier();
-		else if (myBrick.isBrickType(BrickType.SLOW_BOUNCER))
+		else if (myBrick.isBrickType(BrickType.SLOW_BOUNCER)) {
 			myBouncer.slowSpeed();
+			updateHUD("Slow Ball!");
+		}
 	}
 
 	private void decodePaddleAbility(int levelNum) {
@@ -523,20 +524,8 @@ public class GameEngine extends Application {
 	}
 
 	public final void updatePlayerStatusDisplayed(String str) {
-		youLose.set(str);
+		playerStatus.set(str);
 	}
-
-	/**
-	 * Add text to Scene
-	 */
-	public Text addText(String str, double x, double y, Color color) {
-		Text text = new Text(str);
-		text.setX(x);
-		text.setY(y);
-		text.setFill(color);
-		text.setFont(new Font("Fleftex", 16));
-		return text;
-	};
 
 	/**
 	 * Start the program.
