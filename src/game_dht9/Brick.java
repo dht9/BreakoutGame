@@ -14,9 +14,9 @@ public class Brick extends Rectangle {
 	public static final double BRICK_WIDTH = 47.5;
 	public static final double BRICK_HEIGHT = 25;
 	public static final int BRICK_GAP = 5;
-	
+
 	private BrickType brickType;
-	
+
 	enum BrickType {
 		BARRIER(10, Color.WHITE), CREATE_BARRIER(9, Color.BLUE), INFINITE(8, Color.GRAY), LIFE(7,
 				Color.web("#32cd32")), EXPAND_BOUNCER(6, Color.YELLOW), SLOW_BOUNCER(5, Color.RED), HIGH(3,
@@ -39,7 +39,7 @@ public class Brick extends Rectangle {
 		}
 
 	}
-	
+
 	/**
 	 * 
 	 * Initialize and control Brick attributes.
