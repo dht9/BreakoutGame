@@ -3,6 +3,8 @@ package game_dht9;
 /**
  * Team class used in Breakout Game.
  * 
+ * Purpose: to control the number of lives of the team throughout the game.
+ * 
  * @author David Tran (dht9)
  */
 

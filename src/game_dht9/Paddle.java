@@ -8,6 +8,8 @@ import javafx.scene.shape.Rectangle;
 /**
  * Paddle class used in Breakout Game.
  * 
+ * Purpose: to simulate a paddle used in the Breakout game itself.
+ * 
  * @author David Tran (dht9)
  */
 
@@ -64,16 +66,10 @@ public class Paddle extends Rectangle {
 	}
 
 	public void move(double elapsedTime) {
-		// if paddle is at edge and is EDGEWARPPED, still enable mobility
-		if (isAtEdge(GameEngine.SCREEN_WIDTH) && currentAbility == PaddleAbility.EDGEWARP) {
-			this.setX(this.getX() + myVelocity.getX() * elapsedTime);
-		} else {
-			this.setX(this.getX() + myVelocity.getX() * elapsedTime);
-		}
+		this.setX(this.getX() + myVelocity.getX() * elapsedTime);
 	}
 
 	public void stopPaddle1(KeyCode code) {
-		// if RIGHT release while paddle is going right, then stop paddle
 		if (code == KeyCode.RIGHT && myVelocity.getX() == PADDLE_SPEED) {
 			myVelocity = new Point2D(0, 0);
 		} else if (code == KeyCode.LEFT && myVelocity.getX() == -PADDLE_SPEED) {
@@ -82,7 +78,6 @@ public class Paddle extends Rectangle {
 	}
 
 	public void stopPaddle2(KeyCode code) {
-		// if RIGHT release while paddle is going right, then stop paddle
 		if (code == KeyCode.D && myVelocity.getX() == PADDLE_SPEED) {
 			myVelocity = new Point2D(0, 0);
 		} else if (code == KeyCode.A && myVelocity.getX() == -PADDLE_SPEED) {
@@ -91,16 +86,16 @@ public class Paddle extends Rectangle {
 	}
 
 	public void stopPaddleAtEdge() {
-		// if paddle touches left edge
 		if (this.getX() <= 0 || this.getX() + this.getWidth() >= GameEngine.SCREEN_WIDTH)
 			myVelocity = new Point2D(0, 0);
 	}
 
-	public void reposition(double x) {
+	public void repositionAndStop(double x) {
 		this.setX(x);
 		myVelocity = new Point2D(0, 0);
 	}
 
+	// recenter paddle
 	public void reset() {
 		this.setX(GameEngine.SCREEN_WIDTH / 2 - this.getWidth() / 2);
 		myVelocity = new Point2D(0, 0);
@@ -136,15 +131,11 @@ public class Paddle extends Rectangle {
 		if (this.currentAbility == PaddleAbility.EXTENDED && this.isExtended == 0) {
 			this.doubleExtend();
 		} else if (this.previousAbility == PaddleAbility.EXTENDED && this.isExtended == 1) {
-			// shrink paddle if extended for next level
 			this.doubleShrink();
 		}
 	}
 
-	public boolean hasAbility(PaddleAbility type) {
-		return type != null && type instanceof PaddleAbility && currentAbility == type;
-	}
-
+	// enable paddle to "teleport" to the opposite side via the screen edge
 	public void edgeWarp() {
 		if (this.getX() > GameEngine.SCREEN_WIDTH) {
 			this.setX(0);
@@ -189,7 +180,7 @@ public class Paddle extends Rectangle {
 
 	/**
 	 * 
-	 * Access some attributes of the paddle.
+	 * Access some attributes of the paddle for GameEngine.java.
 	 * 
 	 */
 
@@ -203,5 +194,9 @@ public class Paddle extends Rectangle {
 
 	public PaddleAbility getCurrentAbility() {
 		return currentAbility;
+	}
+
+	public boolean hasAbility(PaddleAbility type) {
+		return type != null && type instanceof PaddleAbility && currentAbility == type;
 	}
 }

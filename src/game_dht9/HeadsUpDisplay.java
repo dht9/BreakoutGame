@@ -8,8 +8,9 @@ import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 
 /**
- * HeadsUpDisplay (HUD) class used in Breakout Game to add game stats/updates to
- * the screen during gameplay.
+ * HeadsUpDisplay (HUD) class used in Breakout Game.
+ * 
+ * Purpose: to add game updates/statuses to the screen during gameplay.
  * 
  * @author David Tran (dht9)
  */
@@ -20,6 +21,16 @@ public class HeadsUpDisplay extends BorderPane {
 		this.setPrefSize(GameEngine.SCREEN_WIDTH, GameEngine.SCREEN_HEIGHT - Brick.BRICK_HEIGHT);
 	}
 
+	/**
+	 * Initialize game status labels during gameplay.
+	 * 
+	 * @param description
+	 *            non-dynamic label to describe the dynamic label
+	 * @param value
+	 *            dynamic number or string displayed
+	 * @param position
+	 *            define label location on the screen
+	 */
 	public void createHUDLabel(String description, Object value, String position) {
 		HBox hbox = new HBox();
 		Label label = new Label(description);
@@ -34,7 +45,6 @@ public class HeadsUpDisplay extends BorderPane {
 		}
 		val.setTextFill(Color.WHITE);
 
-		// set position of hbox on borderpane
 		if (position.equalsIgnoreCase("left"))
 			this.setLeft(hbox);
 		else if (position.equalsIgnoreCase("right"))

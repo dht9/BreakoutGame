@@ -6,6 +6,9 @@ import javafx.scene.shape.Rectangle;
 /**
  * Brick class used in Breakout Game.
  * 
+ * The "enum BrickType" approach was inspired by
+ * https://www.ntu.edu.sg/home/ehchua/programming/java/JavaEnum.html
+ * 
  * @author David Tran (dht9)
  */
 
@@ -18,6 +21,9 @@ public class Brick extends Rectangle {
 
 	private BrickType brickType;
 
+	/*
+	 * Define Brick attributes based on type.
+	 */
 	enum BrickType {
 		BARRIER(10, Color.WHITE), CREATE_BARRIER(9, Color.BLUE), INFINITE(8, Color.GRAY), LIFE(7,
 				Color.web("#32cd32")), EXPAND_BOUNCER(6, Color.YELLOW), SLOW_BOUNCER(5, Color.RED), HIGH(3,
@@ -54,6 +60,7 @@ public class Brick extends Rectangle {
 		this.setBrickType(brickNum);
 	}
 
+	// Initialize unique attributes based on brickType.
 	public void setBrickType(int brickNum) {
 		switch (brickNum) {
 		case 10:
@@ -89,6 +96,7 @@ public class Brick extends Rectangle {
 		}
 	}
 
+	// Reduces the brick health by 1, in essence.
 	public void decrementType() {
 		switch (this.brickType.health) {
 		case 10:
@@ -113,6 +121,7 @@ public class Brick extends Rectangle {
 		}
 	}
 
+	// Make the brick invisible and undetectable by the bouncer
 	public void destroyBrick() {
 		this.setX(OUTOFBOUNDS);
 		this.setY(OUTOFBOUNDS);
@@ -121,6 +130,9 @@ public class Brick extends Rectangle {
 		brickType = BrickType.DESTROYED;
 	}
 
+	/**
+	 * Access some brick attributes for GameEngine.java.
+	 */
 	public boolean isBrickType(BrickType type) {
 		return type != null && brickType == type;
 	}
