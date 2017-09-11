@@ -12,8 +12,9 @@
  * The code from "gameFont.css" was retrieved from https://stackoverflow.com/questions/33336542/javafx-custom-fonts.
  * The Fleftex\_M.tff file was downloaded from https://www.dafontfree.net/find.php?q=FLEFTEXM.TTF.
  * The GameEngine.java class was inspired by Robert Duvall at https://coursework.cs.duke.edu/CompSci308\_2017Fall/lab\_bounce/blob/master/src/ExampleBounce.java. The methods are specified in the class file.
- * The Bouncer.java class was also inspired by Robert Duvall at: https://coursework.cs.duke.edu/CompSci308_2017Fall/lab_bounce/blob/master/src/Bouncer.java and by https://gamedev.stackexchange.com/questions/4253/in-pong-how-do-you-calculate-the-balls-direction-when-it-bounces-off-the-paddl
- * The Brick.java class was inspired by https://www.ntu.edu.sg/home/ehchua/programming/java/JavaEnum.html. The details are shown in the class file.
+ * The Bouncer.java class was also inspired by Robert Duvall at: https://coursework.cs.duke.edu/CompSci308_2017Fall/lab_bounce/blob/master/src/Bouncer.java and by https://gamedev.stackexchange.com/questions/4253/in-pong-how-do-you-calculate-the-balls-direction-when-it-bounces-off-the-paddl.s
+ * The Paddle.java class was inspired by https://www.ntu.edu.sg/home/ehchua/programming/java/JavaEnum.html.
+ * The Brick.java class was also inspired by https://www.ntu.edu.sg/home/ehchua/programming/java/JavaEnum.html.
 
 ### Project Files
  * File used to start the project: GameEngine.java

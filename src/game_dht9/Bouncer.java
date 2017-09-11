@@ -8,10 +8,9 @@ import javafx.scene.image.ImageView;
 /**
  * Bouncer class used in Breakout Game.
  * 
- * Purpose: to simulate a ball bouncing and colliding just like in Breakout
- * itself.
+ * Purpose: to simulate a ball bouncing and colliding with other objects.
  * 
- * This class was inspired by Robert Duvall at
+ * Documentation: This class was inspired by Robert Duvall at
  * https://coursework.cs.duke.edu/CompSci308_2017Fall/lab_bounce/blob/master/src/Bouncer.java
  * The calcBounceVelocity() method was inspired by
  * https://gamedev.stackexchange.com/questions/4253/in-pong-how-do-you-calculate-the-balls-direction-when-it-bounces-off-the-paddl

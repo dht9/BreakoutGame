@@ -52,6 +52,7 @@ import java.io.FileNotFoundException;
  * Documentation: start() createLevelScene(), and step() methods inspired by
  * Robert Duvall at
  * https://coursework.cs.duke.edu/CompSci308_2017Fall/lab_bounce/blob/master/src/ExampleBounce.java
+ * The font files used in this class were retrieved from https://www.dafontfree.net/find.php?q=FLEFTEXM.TTF.
  * 
  * @author David Tran (dht9)
  */

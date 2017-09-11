@@ -8,7 +8,10 @@ import javafx.scene.shape.Rectangle;
 /**
  * Paddle class used in Breakout Game.
  * 
- * Purpose: to simulate a paddle used in the Breakout game itself.
+ * Purpose: to simulate a paddle for a bouncer to bounce off of.
+ * 
+ * Documentation: The "enum PaddleAbility" approach was inspired by
+ * https://www.ntu.edu.sg/home/ehchua/programming/java/JavaEnum.html
  * 
  * @author David Tran (dht9)
  */

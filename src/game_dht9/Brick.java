@@ -6,7 +6,9 @@ import javafx.scene.shape.Rectangle;
 /**
  * Brick class used in Breakout Game.
  * 
- * The "enum BrickType" approach was inspired by
+ * Purpose: to simulate bricks for a bounce to collide with and potentially destroy.
+ * 
+ * Documentation: The "enum BrickType" approach was inspired by
  * https://www.ntu.edu.sg/home/ehchua/programming/java/JavaEnum.html
  * 
  * @author David Tran (dht9)
