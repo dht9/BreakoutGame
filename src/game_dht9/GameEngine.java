@@ -44,10 +44,10 @@ import java.io.FileNotFoundException;
  * Assumptions: n/a
  * 
  * Dependencies: This class has a dependency with game_dht9.Brick.BrickType in
- * order to compare the BrickType of a brick to some particular BrickType (eee
- * checkBallBrickCollision()). This class also depends on Paddle.PaddleAbility
- * in order to compare the PaddleAbility of a paddle to some particular
- * PaddleAbility.
+ * order to compare the BrickType of a brick to some particular BrickType (see
+ * checkBouncerBrickCollision()). This class also depends on
+ * Paddle.PaddleAbility in order to compare the PaddleAbility of a paddle to
+ * some particular PaddleAbility.
  * 
  * Documentation: start() createLevelScene(), and step() methods inspired by
  * Robert Duvall at
@@ -113,7 +113,7 @@ public class GameEngine extends Application {
 	 * 
 	 * @param primaryStage
 	 * @param firstLevel
-	 *            The scene of the first level in the game.
+	 *            The scene of the first brick level in the game.
 	 * @return
 	 */
 	public Scene createStartScene(Stage primaryStage, Scene firstLevel) {
@@ -146,7 +146,9 @@ public class GameEngine extends Application {
 	}
 
 	/**
-	 * Initialize objects in the scene for the Breakout levels
+	 * Initialize objects in the Brick Level scene.
+	 * 
+	 * Assumptions: width and height are not negative.
 	 */
 	private Scene createGameScene(Group root, int width, int height, Paint background, int levelNum) {
 
@@ -184,25 +186,21 @@ public class GameEngine extends Application {
 	}
 
 	/**
-	 * Update Ball, Paddle, and Brick attributes for each frame.
+	 * Update Bouncer, Paddle, and Brick attributes for each frame.
 	 */
 	private void step(double elapsedTime) {
 
-		// when ball resets, update position
+		// set starting position
 		if (myBouncer.getVelocityY() == 0 && myBouncer.hasReset()) {
-			stickBallToCenterOfPaddle();
-		}
-		// when ball intersects sticky pad, update position
-		else if (myBouncer.getVelocityY() == 0 && !myBouncer.hasReset()) {
-			stickBallToPaddle(elapsedTime);
-		}
-		// when ball is in movement, update position and check conditions
-		else {
+			stickBouncerToCenterOfPaddle();
+		} else if (myBouncer.getVelocityY() == 0 && !myBouncer.hasReset()) {
+			stickBouncerToPaddle(elapsedTime);
+		} else {
 			myBouncer.move(elapsedTime);
 			myBouncer.bounceOffWalls();
-			checkBallOutOfBounds();
-			checkBallPaddleCollision();
-			checkBallBrickCollision();
+			checkBouncerOutOfBounds();
+			checkBouncerPaddleCollision();
+			checkBouncerBrickCollision();
 
 			if (team.livesEqualTo(0)) {
 				team.resetLives();
@@ -216,8 +214,8 @@ public class GameEngine extends Application {
 		checkPaddleOutOfBounds();
 	}
 
+	// Detect paddle, screen edge collision.
 	private void checkPaddleOutOfBounds() {
-		// control edge collision depending on paddle ability
 		if (myPaddle1.hasAbility(PaddleAbility.EDGEWARP)) {
 			myPaddle1.edgeWarp();
 			myPaddle2.edgeWarp();
@@ -227,60 +225,66 @@ public class GameEngine extends Application {
 		}
 	}
 
-	private void stickBallToCenterOfPaddle() {
+	// Make bouncer follow center of paddle
+	private void stickBouncerToCenterOfPaddle() {
 		myBouncer.repositionAndStop(myPaddle1.getX() + myPaddle1.getWidth() / 2 - myBouncer.getFitWidth() / 2,
 				SCREEN_HEIGHT - myBouncer.getFitHeight() + Paddle.PADDLE1_OFFSET + Bouncer.BOUNCER_HOVER_OFFSET);
 	}
 
-	private void stickBallToPaddle(double elapsedTime) {
+	// Make bouncer follow its point of intersection with paddle
+	private void stickBouncerToPaddle(double elapsedTime) {
 		if (myBouncer.isStartingAtPaddle1())
 			myBouncer.repositionAndStop(myBouncer.getX() + myPaddle1.getVelocityX() * elapsedTime, myBouncer.getY());
 		else
 			myBouncer.repositionAndStop(myBouncer.getX() + myPaddle2.getVelocityX() * elapsedTime, myBouncer.getY());
 	}
 
-	public void checkBallOutOfBounds() {
+	// Detect bouncer collision with left and right screen edge .
+	public void checkBouncerOutOfBounds() {
 		if (myBouncer.checkIfOutOfBounds()) {
 			team.decrementLives();
 			updateHUD("Lost a Life!");
 			updateCurrentLivesDisplayed();
-			resetBallPaddle();
-			// System.out.println("TEAM LIVES LEFT: " + team.getLives());
+			resetBouncerPaddle();
 		}
 	}
 
-	public void resetBallPaddle() {
+	// Move bouncer and paddle to initial starting positions.
+	public void resetBouncerPaddle() {
 		myPaddle1.reset();
 		myPaddle2.reset();
 		myBouncer.reset(myPaddle1);
 	}
 
-	private void checkBallPaddleCollision() {
+	// Detect bouncer, paddle collision
+	private void checkBouncerPaddleCollision() {
 		if (myBouncer.getView().getBoundsInParent().intersects(myPaddle1.getBoundsInParent())) {
-			// if paddle is not sticky, bounce ball
+
 			if (!(myPaddle1.hasAbility(PaddleAbility.STICKY)))
 				myBouncer.bounceOffPaddle(myPaddle1, SCREEN_HEIGHT);
 			else {
 				myBouncer.repositionAndStop(myBouncer.getX(), myPaddle1.getY() - myBouncer.getFitHeight());
 			}
-			// clear power-up activation text once ball hits paddle1.
 			updateHUD("");
+
 		} else if (myBouncer.getView().getBoundsInParent().intersects(myPaddle2.getBoundsInParent())) {
-			// if paddle is not sticky, bounce ball.
+
 			if (!(myPaddle2.hasAbility(PaddleAbility.STICKY)))
 				myBouncer.bounceOffPaddle(myPaddle2, SCREEN_HEIGHT);
 			else
 				myBouncer.repositionAndStop(myBouncer.getX(), myPaddle2.getY() + myPaddle2.getHeight());
-			// clear any power-up activation text once ball hits paddle1.
 			updateHUD("");
 		}
 	}
 
-	public void checkBallBrickCollision() {
+	/**
+	 * Detect bouncer, brick collision and check for power-ups. Detect when the
+	 * level is complete.
+	 */
+	public void checkBouncerBrickCollision() {
+		iter = myBricks.iterator();
 		int bricksHit = 0;
 		int bricksLeft = 0;
-
-		iter = myBricks.iterator();
 
 		while (iter.hasNext()) {
 			Brick myBrick = iter.next();
@@ -289,7 +293,7 @@ public class GameEngine extends Application {
 				if (bricksHit == 1) {
 					myBouncer.bounceOffBrick(myBrick);
 				}
-				// Check CREATE_BARRIER power up first to avoid throwing
+				// Check if brick has "CREATE_BARRIER" power up first to avoid throwing
 				// ConcurrentModificationException (i.e. adding to myBricks while iterating.
 				if (myBrick.isBrickType(BrickType.CREATE_BARRIER)) {
 					myBrick.decrementType();
@@ -310,7 +314,7 @@ public class GameEngine extends Application {
 		if (bricksLeft == 0) {
 			destroyAllBricks();
 			loadBricks(root, currentLevel + 1);
-			resetBallPaddle();
+			resetBouncerPaddle();
 		}
 	}
 
@@ -325,9 +329,9 @@ public class GameEngine extends Application {
 		else if (code == KeyCode.SPACE && currentLevel != NUM_LEVELS + 1) {
 			if (myBouncer.getVelocityX() == 0 && myBouncer.getVelocityY() == 0) {
 				if (myBouncer.isStartingAtPaddle1())
-					myBouncer.releaseBall(myPaddle1);
+					myBouncer.releaseBouncer(myPaddle1);
 				else
-					myBouncer.releaseBall(myPaddle2);
+					myBouncer.releaseBouncer(myPaddle2);
 				updateHUD("");
 			}
 		} else if (code == KeyCode.B)
@@ -370,14 +374,12 @@ public class GameEngine extends Application {
 	}
 
 	/**
-	 * 
 	 * Initialize and control Brick objects.
-	 *
 	 */
 	private void loadBricks(Group root, int levelNum) {
 		if (levelNum != 'B') {
 			destroyAllBricks();
-			resetBallPaddle();
+			resetBouncerPaddle();
 			decodePaddleAbility(levelNum);
 			currentLevel = levelNum;
 			if (levelNum <= NUM_LEVELS)
@@ -386,6 +388,9 @@ public class GameEngine extends Application {
 		readBrickFile(root, levelNum);
 	}
 
+	/**
+	 * Load brick layout from file. Assumption: Text file is in the correct format.
+	 */
 	private void readBrickFile(Group root, int levelNum) {
 		Scanner s;
 		int rows, cols;
@@ -466,6 +471,9 @@ public class GameEngine extends Application {
 	/**
 	 * Initialize and Control Paddle Abilities for each level.
 	 */
+
+	// Connect a paddle ability to a specific level number given by the index of the
+	// ability number + 1.
 	private void createPaddleAbilitySequence() {
 		for (int i = 0; i < NUM_ABILITIES; i++) {
 			abilitySequence.add(i);
@@ -473,11 +481,16 @@ public class GameEngine extends Application {
 		Collections.shuffle(abilitySequence);
 	}
 
+	/**
+	 * Set the paddle ability given the current level of the game.
+	 * 
+	 * (levelNum - 1) is the index at which the particular paddle ability is
+	 * enabled.
+	 */
 	private void decodePaddleAbility(int levelNum) {
 		if (levelNum > 0 && levelNum <= abilitySequence.size()) {
 			myPaddle1.setAbility(abilitySequence.get(levelNum - 1));
 			myPaddle2.setAbility(abilitySequence.get(levelNum - 1));
-			// System.out.println("Paddle Ability: " + myPaddle1.getCurrentAbility());
 		}
 		myPaddle1.enablePaddleAbility();
 		myPaddle2.enablePaddleAbility();
@@ -494,7 +507,7 @@ public class GameEngine extends Application {
 		updateCurrentLevelDisplayed();
 		updatePlayerStatusDisplayed(str);
 	}
-
+	
 	public final void updateCurrentLevelDisplayed() {
 		level.set(currentLevel);
 	}
@@ -507,10 +520,16 @@ public class GameEngine extends Application {
 		paddleAbility.set(myPaddle1.getCurrentAbility().toString());
 	}
 
+	/**
+	 * Update the label in the center of the screen.
+	 * 
+	 * @param str is the text displayed.
+	 */
 	public final void updatePlayerStatusDisplayed(String str) {
 		playerStatus.set(str);
 	}
 
+	// Initialize text in the starting screen.
 	public void addStartMenuText(StartMenu menu) {
 		menu.addLabel("Welcome to 2-Player Breakout!", Color.WHITE, LARGE_FONT);
 		menu.addLabel("\nObjective:", Color.WHITE, MEDIUM_FONT);
