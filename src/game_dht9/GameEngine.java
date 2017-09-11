@@ -39,7 +39,18 @@ import java.io.FileNotFoundException;
 /**
  * Game Engine for Breakout Game for Fall 2017, Computer Science 308.
  * 
- * start() createLevelScene(), and step() methods inspired by Robert Duvall at
+ * Purpose: Use to run JavaFX Application.
+ * 
+ * Assumptions: n/a
+ * 
+ * Dependencies: This class has a dependency with game_dht9.Brick.BrickType in
+ * order to compare the BrickType of a brick to some particular BrickType (eee
+ * checkBallBrickCollision()). This class also depends on Paddle.PaddleAbility
+ * in order to compare the PaddleAbility of a paddle to some particular
+ * PaddleAbility.
+ * 
+ * Documentation: start() createLevelScene(), and step() methods inspired by
+ * Robert Duvall at
  * https://coursework.cs.duke.edu/CompSci308_2017Fall/lab_bounce/blob/master/src/ExampleBounce.java
  * 
  * @author David Tran (dht9)
@@ -80,9 +91,10 @@ public class GameEngine extends Application {
 	private StringProperty playerStatus = new SimpleStringProperty();
 
 	/**
-	 * 
 	 * Initialize what scenes be displayed and how the stage will be updated.
 	 * 
+	 * @param primaryStage,
+	 *            the only stage of the JavaFX application
 	 */
 	@Override
 	public void start(Stage primaryStage) throws Exception {
@@ -95,6 +107,15 @@ public class GameEngine extends Application {
 		primaryStage.show();
 	}
 
+	/**
+	 * This method creates a scene with text and a button that enables the user to
+	 * go to the next scene.
+	 * 
+	 * @param primaryStage
+	 * @param firstLevel
+	 *            The scene of the first level in the game.
+	 * @return
+	 */
 	public Scene createStartScene(Stage primaryStage, Scene firstLevel) {
 		Pane start = new Pane();
 		start.setStyle("-fx-background-color: darkslateblue;-fx-padding: 10px;");
@@ -125,11 +146,10 @@ public class GameEngine extends Application {
 	}
 
 	/**
-	 * Initialize objects in the scene for Breakout levels
+	 * Initialize objects in the scene for the Breakout levels
 	 */
 	private Scene createGameScene(Group root, int width, int height, Paint background, int levelNum) {
 
-		// create objects and set their properties
 		Image ballImage = new Image(getClass().getClassLoader().getResourceAsStream(BALL_IMAGE));
 		Image paddleImage = new Image(getClass().getClassLoader().getResourceAsStream(PADDLE_IMAGE));
 		myBouncer = new Bouncer(ballImage, width, height);
@@ -140,23 +160,20 @@ public class GameEngine extends Application {
 		createPaddleAbilitySequence();
 		team = new Team();
 
-		// Set up text interface for brick level
 		HeadsUpDisplay hud = new HeadsUpDisplay();
 		hud.createHUDLabel(" Level ", level, "left");
 		hud.createHUDLabel("Team Lives Remaining: ", teamLives, "right");
 		hud.createHUDLabel(" Paddle Ability: ", paddleAbility, "bottom");
 		updateHUD("");
-		
+
 		loadBricks(root, levelNum);
 
-		// Set up text for power-up activation or "you lose"
 		Label statusLabel = new Label();
 		statusLabel.textProperty().bind(((StringProperty) playerStatus));
 		statusLabel.setLayoutX(STATUS_LABEL_OFFSETX);
 		statusLabel.setLayoutY(STATUS_LABEL_OFFSETY);
 		statusLabel.setTextFill(Color.WHITE);
 
-		// create a place to see the shapes
 		root.getChildren().addAll(myBouncer.getView(), myPaddle1, myPaddle2, hud, statusLabel);
 		root.getStylesheets().add(getClass().getResource("/gameFont.css").toExternalForm());
 		myScene = new Scene(root, width, height, background);
@@ -212,16 +229,14 @@ public class GameEngine extends Application {
 
 	private void stickBallToCenterOfPaddle() {
 		myBouncer.repositionAndStop(myPaddle1.getX() + myPaddle1.getWidth() / 2 - myBouncer.getFitWidth() / 2,
-				SCREEN_HEIGHT - myBouncer.getFitHeight() + Paddle.PADDLE1_OFFSET + Bouncer.BOUNCER_HOVER);
+				SCREEN_HEIGHT - myBouncer.getFitHeight() + Paddle.PADDLE1_OFFSET + Bouncer.BOUNCER_HOVER_OFFSET);
 	}
 
 	private void stickBallToPaddle(double elapsedTime) {
 		if (myBouncer.isStartingAtPaddle1())
-			myBouncer.repositionAndStop(myBouncer.getX() + myPaddle1.getVelocityX() * elapsedTime,
-					myBouncer.getY());
+			myBouncer.repositionAndStop(myBouncer.getX() + myPaddle1.getVelocityX() * elapsedTime, myBouncer.getY());
 		else
-			myBouncer.repositionAndStop(myBouncer.getX() + myPaddle2.getVelocityX() * elapsedTime,
-					myBouncer.getY());
+			myBouncer.repositionAndStop(myBouncer.getX() + myPaddle2.getVelocityX() * elapsedTime, myBouncer.getY());
 	}
 
 	public void checkBallOutOfBounds() {
@@ -246,8 +261,7 @@ public class GameEngine extends Application {
 			if (!(myPaddle1.hasAbility(PaddleAbility.STICKY)))
 				myBouncer.bounceOffPaddle(myPaddle1, SCREEN_HEIGHT);
 			else {
-				myBouncer.repositionAndStop(myBouncer.getX(),
-						myPaddle1.getY() - myBouncer.getFitHeight());
+				myBouncer.repositionAndStop(myBouncer.getX(), myPaddle1.getY() - myBouncer.getFitHeight());
 			}
 			// clear power-up activation text once ball hits paddle1.
 			updateHUD("");
@@ -272,7 +286,6 @@ public class GameEngine extends Application {
 			Brick myBrick = iter.next();
 			if (myBrick.getBoundsInParent().intersects(myBouncer.getView().getBoundsInParent())) {
 				bricksHit++;
-				// simulate only 1 bounce even if ball hits 2 bricks.
 				if (bricksHit == 1) {
 					myBouncer.bounceOffBrick(myBrick);
 				}
@@ -310,7 +323,6 @@ public class GameEngine extends Application {
 		else if (code == KeyCode.D || code == KeyCode.A)
 			myPaddle2.startPaddle2(code);
 		else if (code == KeyCode.SPACE && currentLevel != NUM_LEVELS + 1) {
-			// release the ball from paddle
 			if (myBouncer.getVelocityX() == 0 && myBouncer.getVelocityY() == 0) {
 				if (myBouncer.isStartingAtPaddle1())
 					myBouncer.releaseBall(myPaddle1);
@@ -363,7 +375,6 @@ public class GameEngine extends Application {
 	 *
 	 */
 	private void loadBricks(Group root, int levelNum) {
-		// clear and reset objects if barrier is not being loaded
 		if (levelNum != 'B') {
 			destroyAllBricks();
 			resetBallPaddle();
@@ -405,7 +416,6 @@ public class GameEngine extends Application {
 			for (int i = 0; i < rows; i++) {
 				for (int j = 0; j < cols; j++) {
 					board[i][j] = s.nextInt();
-					// add bricks to scene
 					if (board[i][j] != 0) {
 						myBrick = new Brick(j, i, board[i][j], Brick.BRICK_GAP);
 						myBricks.add(myBrick);
