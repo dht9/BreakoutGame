@@ -1,6 +1,6 @@
-### Breakout Game, Computer Science 308
+# Breakout Game, Computer Science 308
 
-### General Info
+## General Info
 
  * Name of project designer: David Tran
  * Date started: August 30, 2017
